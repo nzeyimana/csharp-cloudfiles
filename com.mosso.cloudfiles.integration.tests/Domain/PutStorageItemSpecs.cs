@@ -23,7 +23,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutStorageItemSpecs
 
                 Assert.That(putStorageItem.ContentLength, Is.EqualTo(34));
 
-                var response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(putStorageItem));
+                var response = new ResponseFactory().Create(new CloudFilesRequest(putStorageItem));
                 Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Created));
                 Assert.That(response.Headers[Constants.ETAG], Is.EqualTo(putStorageItem.ETag));
                 testHelper.DeleteItemFromContainer();
@@ -41,7 +41,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutStorageItemSpecs
                 Assert.That(putStorageItem.ContentLength, Is.GreaterThan(0));
                 Assert.That(putStorageItem.ContentType, Is.EqualTo("image/jpeg"));
 
-                var response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(putStorageItem));
+                var response = new ResponseFactory().Create(new CloudFilesRequest(putStorageItem));
                 Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Created));
                 Assert.That(response.Headers[Constants.ETAG], Is.EqualTo(putStorageItem.ETag));
                 testHelper.DeleteItemFromContainer(Constants.StorageItemNameJpg);
@@ -65,12 +65,12 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutStorageItemSpecs
                 Assert.That(putStorageItem.ContentLength, Is.GreaterThan(0));
                 Assert.That(putStorageItem.ContentType, Is.EqualTo("application/octet-stream"));
 
-                var response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(putStorageItem));
+                var response = new ResponseFactory().Create(new CloudFilesRequest(putStorageItem));
                 Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Created));
                 Assert.That(response.Headers[Constants.ETAG], Is.EqualTo(putStorageItem.ETag));
 
                 var getStorageItem = new GetStorageItem(storageUrl, Constants.CONTAINER_NAME, DUMMY_FILE_NAME, authToken);
-                var getStorageItemResponse = new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(new CloudFilesRequest(getStorageItem));
+                var getStorageItemResponse = new ResponseFactoryWithContentBody().Create(new CloudFilesRequest(getStorageItem));
                 Assert.That(getStorageItemResponse.ContentType, Is.EqualTo("application/octet-stream"));
                 getStorageItemResponse.Dispose();
 
@@ -89,7 +89,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutStorageItemSpecs
                 Assert.That(putStorageItem.ContentLength, Is.GreaterThan(0));
                 Assert.That(putStorageItem.ContentType, Is.EqualTo("image/gif"));
 
-                var response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(putStorageItem));
+                var response = new ResponseFactory().Create(new CloudFilesRequest(putStorageItem));
                 Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Created));
                 Assert.That(response.Headers[Constants.ETAG], Is.EqualTo(putStorageItem.ETag));
                 testHelper.DeleteItemFromContainer(Constants.StorageItemNameGif);
@@ -108,7 +108,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutStorageItemSpecs
                 Assert.That(putStorageItem.ContentLength, Is.GreaterThan(0));
                 Assert.That(putStorageItem.ContentType, Is.EqualTo("image/jpeg"));
 
-                var response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(putStorageItem));
+                var response = new ResponseFactory().Create(new CloudFilesRequest(putStorageItem));
                 Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Created));
                 Assert.That(response.Headers[Constants.ETAG], Is.EqualTo(putStorageItem.ETag));
                 testHelper.DeleteItemFromContainer(Constants.StorageItemNameJpg);
@@ -127,7 +127,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutStorageItemSpecs
                 Assert.That(putStorageItem.ContentLength, Is.GreaterThan(0));
                 Assert.That(putStorageItem.ContentType, Is.EqualTo("image/gif"));
 
-                var response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(putStorageItem));
+                var response = new ResponseFactory().Create(new CloudFilesRequest(putStorageItem));
                 Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Created));
                 Assert.That(response.Headers[Constants.ETAG], Is.EqualTo(putStorageItem.ETag));
                 testHelper.DeleteItemFromContainer(Constants.StorageItemNameGif);
@@ -145,7 +145,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutStorageItemSpecs
                 var putStorageItem = new PutStorageItem(storageUrl, authToken, Constants.CONTAINER_NAME, Constants.StorageItemName, Constants.StorageItemName);
                 putStorageItem.Headers.Remove("ETag");
 
-                var response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(putStorageItem));
+                var response = new ResponseFactory().Create(new CloudFilesRequest(putStorageItem));
                 Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Created));
                 testHelper.DeleteItemFromContainer();
             }
@@ -159,7 +159,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutStorageItemSpecs
             {
                 var fs = new FileStream(Constants.StorageItemName, FileMode.Open);
                 var putStorageItem = new PutStorageItem(storageUrl, authToken, Constants.CONTAINER_NAME, Constants.StorageItemName, fs, null);
-                var response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(putStorageItem));
+                var response = new ResponseFactory().Create(new CloudFilesRequest(putStorageItem));
                 fs.Close();
                 Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Created));
                 testHelper.DeleteItemFromContainer();
@@ -175,7 +175,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutStorageItemSpecs
                 var putStorageItem = new PutStorageItem(storageUrl, authToken, Constants.CONTAINER_NAME, Constants.StorageItemName, Constants.StorageItemName);
                 putStorageItem.Headers.Remove("Content-Length");
 
-                var response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(putStorageItem));
+                var response = new ResponseFactory().Create(new CloudFilesRequest(putStorageItem));
                 Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Created));
                 Assert.That(response.Headers[Constants.ETAG], Is.EqualTo(putStorageItem.ETag));
                 testHelper.DeleteItemFromContainer();
@@ -192,7 +192,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutStorageItemSpecs
                 var putStorageItem = new PutStorageItem(storageUrl, authToken, Constants.CONTAINER_NAME, Constants.StorageItemName, Constants.StorageItemName);
                 putStorageItem.Headers.Remove("Content-Type");
 
-                var response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(putStorageItem));
+                var response = new ResponseFactory().Create(new CloudFilesRequest(putStorageItem));
                 Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Created));
                 Assert.That(response.Headers[Constants.ETAG], Is.EqualTo(putStorageItem.ETag));
                 testHelper.DeleteItemFromContainer();
@@ -210,7 +210,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutStorageItemSpecs
                 putStorageItem.Headers.Add("ETag", new string('A', 32));
                 try
                 {
-                    new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(putStorageItem));
+                    new ResponseFactory().Create(new CloudFilesRequest(putStorageItem));
                 }
                 catch (Exception ex)
                 {
@@ -239,7 +239,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutStorageItemSpecs
 
                 Assert.That(putStorageItem.ContentLength, Is.GreaterThan(0));
 
-                var response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(putStorageItem));
+                var response = new ResponseFactory().Create(new CloudFilesRequest(putStorageItem));
                 Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Created));
                 Assert.That(response.Headers[Constants.ETAG], Is.EqualTo(putStorageItem.ETag));
                 testHelper.DeleteItemFromContainer();

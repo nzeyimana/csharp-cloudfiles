@@ -23,7 +23,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
 
 
                 var response =
-                    new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(
+                    new ResponseFactoryWithContentBody().Create(
                         new CloudFilesRequest(getContainerItemsRequest));
                 response.Dispose();
                 Assert.That(response.Status, Is.EqualTo(HttpStatusCode.NoContent));
@@ -41,7 +41,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
                 getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
 
                 var response =
-                    new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(
+                    new ResponseFactoryWithContentBody().Create(
                         new CloudFilesRequest(getContainerItemsRequest));
                 testHelper.DeleteItemFromContainer(Constants.StorageItemName);
 
@@ -60,7 +60,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
             try
             {
                 var response =
-                    new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(
+                    new ResponseFactoryWithContentBody().Create(
                         new CloudFilesRequest(getContainerItemsRequest));
                 response.Dispose();
             }
@@ -115,7 +115,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
                 getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
 
                 var response =
-                    new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(
+                    new ResponseFactoryWithContentBody().Create(
                         new CloudFilesRequest(getContainerItemsRequest));
 
                 for (int i = 0; i < 12; ++i)
@@ -151,7 +151,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
                 getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
 
                 var response =
-                    new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(
+                    new ResponseFactoryWithContentBody().Create(
                         new CloudFilesRequest(getContainerItemsRequest));
 
                 for (int i = 0; i < 12; ++i)
@@ -201,7 +201,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
                 getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
 
                 var response =
-                    new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(
+                    new ResponseFactoryWithContentBody().Create(
                         new CloudFilesRequest(getContainerItemsRequest));
 
                 for (int i = 0; i < 12; ++i)
@@ -240,7 +240,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
                 getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
 
                 var response =
-                    new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(
+                    new ResponseFactoryWithContentBody().Create(
                         new CloudFilesRequest(getContainerItemsRequest));
 
                 for (int i = 0; i < 12; ++i)
@@ -269,7 +269,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
                 getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
 
                 var response =
-                    new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(
+                    new ResponseFactoryWithContentBody().Create(
                         new CloudFilesRequest(getContainerItemsRequest));
 
                 for (int i = 0; i < 12; ++i)
@@ -320,7 +320,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
             var getContainerItemList = new GetContainerItemList(storageUrl, authToken, "#container");
 
             var response =
-                new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(
+                new ResponseFactoryWithContentBody().Create(
                     new CloudFilesRequest((getContainerItemList)));
 
             response.Dispose();
@@ -334,7 +334,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
             var getContainerItemList = new GetContainerItemList(storageUrl, authToken, containerName);
 
             var response =
-                new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(
+                new ResponseFactoryWithContentBody().Create(
                     new CloudFilesRequest((getContainerItemList)));
 
             response.Dispose();
@@ -351,7 +351,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
             var getContainerItemList = new GetContainerItemList(storageUrl, authToken, containerName);
 
             var response =
-                new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(
+                new ResponseFactoryWithContentBody().Create(
                     new CloudFilesRequest((getContainerItemList)));
 
             foreach (string s in response.ContentBody)
@@ -368,7 +368,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
             var getContainerItemList = new GetContainerItemList(storageUrl, authToken, containerName);
 
             var response =
-                new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(
+                new ResponseFactoryWithContentBody().Create(
                     new CloudFilesRequest((getContainerItemList)));
 
             response.Dispose();

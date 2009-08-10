@@ -9,7 +9,7 @@ namespace com.mosso.cloudfiles.integration.tests.Domain.CF.AccountSpecs
     public class AccountIntegrationTestBase
     {
         protected UserCredentials userCredentials;
-        protected IConnection connection;
+        protected AbstractConnection connection;
         protected IAccount account;
 
         [SetUp]

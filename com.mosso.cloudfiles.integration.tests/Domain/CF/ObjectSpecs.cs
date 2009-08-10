@@ -17,7 +17,7 @@ namespace com.mosso.cloudfiles.integration.tests.Domain.CF.ObjectSpecs
         public void Setup()
         {
             var userCredentials = new UserCredentials(Credentials.USERNAME, Credentials.API_KEY);
-            IConnection connection = new Connection(userCredentials);
+            AbstractConnection connection = new Connection(userCredentials);
 
             account = connection.Account;
             container = account.CreateContainer(Constants.CONTAINER_NAME);

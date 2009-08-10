@@ -10,13 +10,13 @@ namespace com.mosso.cloudfiles.integration.tests
     {
         protected string storageUrl;
         protected string authToken;
-        protected IConnection connection;
+        protected AbstractConnection connection;
 
         [SetUp]
         public void SetUpBase()
         {
             var request = new GetAuthentication(new UserCredentials(Credentials.USERNAME, Credentials.API_KEY));
-            var response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(request));
+            var response = new ResponseFactory().Create(new CloudFilesRequest(request));
 
             storageUrl = response.Headers[Constants.XStorageUrl];
             authToken = response.Headers[Constants.XAuthToken];

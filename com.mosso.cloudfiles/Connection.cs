@@ -43,8 +43,11 @@ namespace com.mosso.cloudfiles
     /// IConnection connection = new Connection(userCredentials);
     /// </code>
     /// </example>
-    public class Connection : IConnection
+    public class Connection : AbstractConnection
     {
+        private readonly IResponseFactory _responseFactory;
+        private readonly IResponseFactoryWithContentBody _responseFactoryWithBody;
+        
         public delegate void OperationCompleteCallback();
 
         public event OperationCompleteCallback OperationComplete;
@@ -53,6 +56,26 @@ namespace com.mosso.cloudfiles
         private bool retry;
         private List<ProgressCallback> callbackFuncs;
 
+        /// <summary>
+        /// Constructor available for testing responsefactories
+        /// </summary>
+        /// <param name="userCredentials"></param>
+        /// <param name="responseFactory"></param>
+        /// <param name="responseFactoryWithBody"></param>
+        public Connection(UserCredentials userCredentials, IResponseFactory responseFactory,
+            IResponseFactoryWithContentBody responseFactoryWithBody)
+        {
+            _responseFactory = responseFactory;
+            _responseFactoryWithBody = responseFactoryWithBody;
+            callbackFuncs = new List<ProgressCallback>();
+            Log.EnsureInitialized();
+            AuthToken = "";
+            StorageUrl = "";
+            if (userCredentials == null) throw new ArgumentNullException("userCredentials");
+
+            UserCredentials = userCredentials;
+            VerifyAuthentication();
+        }
         /// <summary>
         /// A constructor used to create an instance of the Connection class
         /// </summary>
@@ -64,16 +87,9 @@ namespace com.mosso.cloudfiles
         /// </example>
         /// <param name="userCredentials">An instance of the UserCredentials class, containing all pertinent authentication information</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public Connection(UserCredentials userCredentials)
+        public Connection(UserCredentials userCredentials):this(userCredentials, new ResponseFactory(), new ResponseFactoryWithContentBody())
         {
-            callbackFuncs = new List<ProgressCallback>();
-            Log.EnsureInitialized();
-            AuthToken = "";
-            StorageUrl = "";
-            if (userCredentials == null) throw new ArgumentNullException("userCredentials");
 
-            UserCredentials = userCredentials;
-            VerifyAuthentication();
         }
 
         protected virtual void VerifyAuthentication()
@@ -90,7 +106,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var getAuthentication = new GetAuthentication(UserCredentials);
-                var getAuthenticationResponse = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(getAuthentication, UserCredentials.ProxyCredentials));
+                var getAuthenticationResponse = _responseFactory.Create(new CloudFilesRequest(getAuthentication, UserCredentials.ProxyCredentials));
                 if (getAuthenticationResponse.Status == HttpStatusCode.NoContent)
                 {
                     StorageUrl = getAuthenticationResponse.Headers[Constants.X_STORAGE_URL];
@@ -127,7 +143,7 @@ namespace com.mosso.cloudfiles
                    && UserCredentials != null;
         }
 
-        public IAccount Account
+        public override IAccount Account
         {
             get
             {
@@ -141,26 +157,6 @@ namespace com.mosso.cloudfiles
         }
 
         /// <summary>
-        /// The user credentials used to authenticate against cloud files
-        /// </summary>
-        public UserCredentials UserCredentials { get; private set; }
-
-        /// <summary>
-        /// The storage url used to interact with cloud files
-        /// </summary>
-        public string StorageUrl { get; private set; }
-
-        /// <summary>
-        /// the session based token used to ensure the user was authenticated
-        /// </summary>
-        public string AuthToken { get; private set; }
-
-        /// <summary>
-        /// the public cdn url for the authenticated user
-        /// </summary>
-        public string CdnManagementUrl { get; private set; }
-
-        /// <summary>
         /// This method returns the number of containers and the size, in bytes, of the specified account
         /// </summary>
         /// <example>
@@ -171,14 +167,14 @@ namespace com.mosso.cloudfiles
         /// </code>
         /// </example>
         /// <returns>An instance of AccountInformation, containing the byte size and number of containers associated with this account</returns>
-        public AccountInformation GetAccountInformation()
+        public override AccountInformation GetAccountInformation()
         {
             Log.Info(this, "Getting account information for user " + UserCredentials.Username);
             try
             {
                 var getAccountInformation = new GetAccountInformation(StorageUrl, AuthToken);
                 var getAccountInformationResponse =
-                    new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(getAccountInformation));
+                    _responseFactory.Create(new CloudFilesRequest(getAccountInformation));
                 return new AccountInformation(getAccountInformationResponse.Headers[Constants.X_ACCOUNT_CONTAINER_COUNT],
                                               getAccountInformationResponse.Headers[Constants.X_ACCOUNT_BYTES_USED]);
             }
@@ -201,13 +197,13 @@ namespace com.mosso.cloudfiles
         /// </code>
         /// </example>
         /// <returns>JSON serialized format of the account information</returns>
-        public string GetAccountInformationJson()
+        public override string GetAccountInformationJson()
         {
             try
             {
                 Log.Info(this, "Getting account information (JSON format) for user " + UserCredentials.Username);
                 var getAccountInformationJson = new GetAccountInformationSerialized(StorageUrl, AuthToken, Format.JSON);
-                var getAccountInformationJsonResponse = new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>()
+                var getAccountInformationJsonResponse = _responseFactoryWithBody
                     .Create(new CloudFilesRequest(getAccountInformationJson));
 
                 if (getAccountInformationJsonResponse.ContentBody.Count == 0) return "";
@@ -236,13 +232,13 @@ namespace com.mosso.cloudfiles
         /// </code>
         /// </example>
         /// <returns>XML serialized format of the account information</returns>
-        public XmlDocument GetAccountInformationXml()
+        public override XmlDocument GetAccountInformationXml()
         {
             try
             {
                 Log.Info(this, "Getting account information (XML format) for user " + UserCredentials.Username);
                 var accountInformationXml = new GetAccountInformationSerialized(StorageUrl, AuthToken, Format.XML);
-                var getAccountInformationXmlResponse = new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(new CloudFilesRequest(accountInformationXml));
+                var getAccountInformationXmlResponse = _responseFactoryWithBody.Create(new CloudFilesRequest(accountInformationXml));
 
                 if (getAccountInformationXmlResponse.ContentBody.Count == 0) return new XmlDocument();
 
@@ -282,7 +278,7 @@ namespace com.mosso.cloudfiles
         /// </example>
         /// <param name="containerName">The desired name of the container</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public void CreateContainer(string containerName)
+        public override void CreateContainer(string containerName)
         {
             try
             {
@@ -292,7 +288,7 @@ namespace com.mosso.cloudfiles
                 Log.Info(this, "Creating container '" + containerName + "' for user " + UserCredentials.Username);
 
                 var createContainer = new CreateContainer(StorageUrl, AuthToken, containerName);
-                var createContainerResponse = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(createContainer, UserCredentials.ProxyCredentials));
+                var createContainerResponse = _responseFactory.Create(new CloudFilesRequest(createContainer, UserCredentials.ProxyCredentials));
                 if (createContainerResponse.Status == HttpStatusCode.Accepted)
                     throw new ContainerAlreadyExistsException("The container already exists");    
             }
@@ -317,7 +313,7 @@ namespace com.mosso.cloudfiles
         /// </example>
         /// <param name="containerName">The name of the container to delete</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public void DeleteContainer(string containerName)
+        public override void DeleteContainer(string containerName)
         {
             if (string.IsNullOrEmpty(containerName))
                 throw new ArgumentNullException();
@@ -327,7 +323,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var deleteContainer = new DeleteContainer(StorageUrl, AuthToken, containerName);
-                new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(deleteContainer, UserCredentials.ProxyCredentials));
+                _responseFactory.Create(new CloudFilesRequest(deleteContainer, UserCredentials.ProxyCredentials));
             }
             catch (WebException ex)
             {
@@ -355,14 +351,14 @@ namespace com.mosso.cloudfiles
         /// </code>
         /// </example>
         /// <returns>An instance of List, containing the names of the containers this account owns</returns>
-        public List<string> GetContainers()
+        public override List<string> GetContainers()
         {
             Log.Info(this, "Getting containers for user " + UserCredentials.Username);
             try
             {
                 List<string> containerList = null;
                 var getContainers = new GetContainers(StorageUrl, AuthToken);
-                var getContainersResponse = new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(new CloudFilesRequest(getContainers, UserCredentials.ProxyCredentials));
+                var getContainersResponse = _responseFactoryWithBody.Create(new CloudFilesRequest(getContainers, UserCredentials.ProxyCredentials));
                 if (getContainersResponse.Status == HttpStatusCode.OK)
                 {
                     containerList = getContainersResponse.ContentBody;
@@ -390,7 +386,7 @@ namespace com.mosso.cloudfiles
         /// <param name="containerName">The name of the container</param>
         /// <returns>An instance of List, containing the names of the storage objects in the give container</returns>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public List<string> GetContainerItemList(string containerName)
+        public override List<string> GetContainerItemList(string containerName)
         {
             try
             {
@@ -426,7 +422,7 @@ namespace com.mosso.cloudfiles
         /// <param name="containerName">The container to create the directory objects in</param>
         /// <param name="path">The path of directory objects to create</param>
         /// <returns>An instance of List, containing the names of the storage objects in the give container</returns>
-        public void MakePath(string containerName, string path)
+        public override void MakePath(string containerName, string path)
         {
             try
             {
@@ -476,7 +472,7 @@ namespace com.mosso.cloudfiles
         /// <param name="parameters">Parameters to feed to the request to filter the returned list</param>
         /// <returns>An instance of List, containing the names of the storage objects in the give container</returns>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public List<string> GetContainerItemList(string containerName, Dictionary<GetItemListParameters, string> parameters)
+        public override List<string> GetContainerItemList(string containerName, Dictionary<GetItemListParameters, string> parameters)
          {
              if (string.IsNullOrEmpty(containerName))
                  throw new ArgumentNullException();
@@ -491,7 +487,7 @@ namespace com.mosso.cloudfiles
              {
                  var getContainerItemList = new GetContainerItemList(StorageUrl, AuthToken, containerName, parameters);
                  var getContainerItemListResponse =
-                     new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(
+                     _responseFactoryWithBody.Create(
                          new CloudFilesRequest(getContainerItemList, UserCredentials.ProxyCredentials));
                  if (getContainerItemListResponse.Status == HttpStatusCode.OK)
                  {
@@ -526,7 +522,7 @@ namespace com.mosso.cloudfiles
         /// <param name="containerName">The name of the container to query about</param>
         /// <returns>An instance of container, with the number of storage objects contained and total byte allocation</returns>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public Container GetContainerInformation(string containerName)
+        public override Container GetContainerInformation(string containerName)
         {
             if (string.IsNullOrEmpty(containerName))
                 throw new ArgumentNullException();
@@ -538,7 +534,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var getContainerInformation = new GetContainerInformation(StorageUrl, AuthToken, containerName);
-                var getContainerInformationResponse = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(getContainerInformation, UserCredentials.ProxyCredentials));
+                var getContainerInformationResponse = _responseFactory.Create(new CloudFilesRequest(getContainerInformation, UserCredentials.ProxyCredentials));
                 var container = new Container(containerName);
                 container.ByteCount = long.Parse(getContainerInformationResponse.Headers[Constants.X_CONTAINER_BYTES_USED]);
                 container.ObjectCount = long.Parse(getContainerInformationResponse.Headers[Constants.X_CONTAINER_STORAGE_OBJECT_COUNT]);
@@ -570,7 +566,7 @@ namespace com.mosso.cloudfiles
                 var public_container = GetPublicContainerInformation(container.Name);
                 return public_container == null ? "" : public_container.CdnUri;
             }
-            catch (ContainerNotFoundException cnfe)
+            catch (ContainerNotFoundException)
             {
                 return "";
             }
@@ -600,7 +596,7 @@ namespace com.mosso.cloudfiles
         /// <param name="containerName">name of the container to get information</param>
         /// <returns>json string of object information inside the container</returns>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public string GetContainerInformationJson(string containerName)
+        public override string GetContainerInformationJson(string containerName)
         {
             if (string.IsNullOrEmpty(containerName))
                 throw new ArgumentNullException();
@@ -612,7 +608,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var getContainerInformation = new GetContainerInformationSerialized(StorageUrl, AuthToken, containerName, Format.JSON);
-                var getSerializedResponse = new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(new CloudFilesRequest(getContainerInformation, UserCredentials.ProxyCredentials));
+                var getSerializedResponse = _responseFactoryWithBody.Create(new CloudFilesRequest(getContainerInformation, UserCredentials.ProxyCredentials));
                 var jsonResponse = String.Join("", getSerializedResponse.ContentBody.ToArray());
                 getSerializedResponse.Dispose();
                 return jsonResponse;
@@ -644,7 +640,7 @@ namespace com.mosso.cloudfiles
         /// <param name="containerName">name of the container to get information</param>
         /// <returns>xml document of object information inside the container</returns>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public XmlDocument GetContainerInformationXml(string containerName)
+        public override XmlDocument GetContainerInformationXml(string containerName)
         {
             if (string.IsNullOrEmpty(containerName))
                 throw new ArgumentNullException();
@@ -656,7 +652,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var getContainerInformation = new GetContainerInformationSerialized(StorageUrl, AuthToken, containerName, Format.XML);
-                var getSerializedResponse = new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(new CloudFilesRequest(getContainerInformation, UserCredentials.ProxyCredentials));
+                var getSerializedResponse = _responseFactoryWithBody.Create(new CloudFilesRequest(getContainerInformation, UserCredentials.ProxyCredentials));
                 var xmlResponse = String.Join("", getSerializedResponse.ContentBody.ToArray());
                 getSerializedResponse.Dispose();
 
@@ -707,7 +703,7 @@ namespace com.mosso.cloudfiles
         /// <param name="localFilePath">The complete file path of the storage object to be uploaded</param>
         /// <param name="metadata">An optional parameter containing a dictionary of meta tags to associate with the storage object</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public void PutStorageItem(string containerName, string localFilePath, Dictionary<string, string> metadata)
+        public override void PutStorageItem(string containerName, string localFilePath, Dictionary<string, string> metadata)
         {
             if(string.IsNullOrEmpty(containerName) ||
                 string.IsNullOrEmpty(localFilePath))
@@ -727,7 +723,7 @@ namespace com.mosso.cloudfiles
                 {
                     putStorageItem.Progress += callback;
                 }
-                new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(putStorageItem, UserCredentials.ProxyCredentials));
+                _responseFactory.Create(new CloudFilesRequest(putStorageItem, UserCredentials.ProxyCredentials));
             }
             catch (WebException webException)
             {
@@ -760,7 +756,7 @@ namespace com.mosso.cloudfiles
         /// <param name="containerName">The name of the container to put the storage object in</param>
         /// <param name="localFilePath">The complete file path of the storage object to be uploaded</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public void PutStorageItem(string containerName, string localFilePath)
+        public override void PutStorageItem(string containerName, string localFilePath)
         {
             if (string.IsNullOrEmpty(containerName) ||
                 string.IsNullOrEmpty(localFilePath))
@@ -789,7 +785,7 @@ namespace com.mosso.cloudfiles
         /// <param name="remoteStorageItemName">The alternate name as it will be called on cloudfiles</param>
         /// <param name="storageStream">The stream representing the storage item to upload</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public void PutStorageItem(string containerName, Stream storageStream, string remoteStorageItemName)
+        public override void PutStorageItem(string containerName, Stream storageStream, string remoteStorageItemName)
         {
             if (string.IsNullOrEmpty(containerName) ||
                 string.IsNullOrEmpty(remoteStorageItemName))
@@ -850,7 +846,7 @@ namespace com.mosso.cloudfiles
         /// <param name="remoteStorageItemName">The alternate name as it will be called on cloudfiles</param>
         /// <param name="storageStream">The stream representing the storage item to upload</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public void PutStorageItemAsync(string containerName, Stream storageStream, string remoteStorageItemName)
+        public override void PutStorageItemAsync(string containerName, Stream storageStream, string remoteStorageItemName)
         {
             var thread = new Thread(
                 () =>
@@ -1057,7 +1053,7 @@ namespace com.mosso.cloudfiles
         /// <param name="containerName">The name of the container to put the storage object in</param>
         /// <param name="localStorageItemName">The name of the file locally </param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public void PutStorageItemAsync(string containerName, string localStorageItemName)
+        public override void PutStorageItemAsync(string containerName, string localStorageItemName)
         {
             var thread = new Thread(
                 () => 
@@ -1099,7 +1095,7 @@ namespace com.mosso.cloudfiles
         /// <param name="metadata">An optional parameter containing a dictionary of meta tags to associate with the storage object</param>
         /// <param name="remoteStorageItemName">The name of the storage object as it will be called on cloudfiles</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public void PutStorageItem(string containerName, Stream storageStream, string remoteStorageItemName, Dictionary<string, string> metadata)
+        public override void PutStorageItem(string containerName, Stream storageStream, string remoteStorageItemName, Dictionary<string, string> metadata)
         {
             if (string.IsNullOrEmpty(containerName) ||
                 string.IsNullOrEmpty(remoteStorageItemName))
@@ -1117,7 +1113,7 @@ namespace com.mosso.cloudfiles
                 {
                     putStorageItem.Progress += callback;
                 }
-                new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(putStorageItem, UserCredentials.ProxyCredentials));
+                _responseFactory.Create(new CloudFilesRequest(putStorageItem, UserCredentials.ProxyCredentials));
             }
             catch (WebException webException)
             {
@@ -1153,7 +1149,7 @@ namespace com.mosso.cloudfiles
         /// <param name="containerName">The name of the container that contains the storage object</param>
         /// <param name="storageItemName">The name of the storage object to delete</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public void DeleteStorageItem(string containerName, string storageItemName)
+        public override void DeleteStorageItem(string containerName, string storageItemName)
         {
             if (string.IsNullOrEmpty(containerName) ||
                 string.IsNullOrEmpty(storageItemName))
@@ -1167,7 +1163,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var deleteStorageItem = new DeleteStorageItem(StorageUrl, AuthToken, containerName, storageItemName);
-                new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(deleteStorageItem));
+                _responseFactory.Create(new CloudFilesRequest(deleteStorageItem));
             }
             catch (WebException we)
             {
@@ -1198,7 +1194,7 @@ namespace com.mosso.cloudfiles
         /// <param name="storageItemName">The name of the storage object to retrieve</param>
         /// <returns>An instance of StorageItem with the stream containing the bytes representing the desired storage object</returns>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public StorageItem GetStorageItem(string containerName, string storageItemName)
+        public override StorageItem GetStorageItem(string containerName, string storageItemName)
         {
             if (string.IsNullOrEmpty(containerName) ||
                string.IsNullOrEmpty(storageItemName))
@@ -1235,7 +1231,7 @@ namespace com.mosso.cloudfiles
         /// <param name="requestHeaderFields">A dictionary containing the special headers and their values</param>
         /// <returns>An instance of StorageItem with the stream containing the bytes representing the desired storage object</returns>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public StorageItem GetStorageItem(string containerName, string storageItemName, Dictionary<RequestHeaderFields, string> requestHeaderFields)
+        public override StorageItem GetStorageItem(string containerName, string storageItemName, Dictionary<RequestHeaderFields, string> requestHeaderFields)
         {
             if (string.IsNullOrEmpty(containerName) ||
                string.IsNullOrEmpty(storageItemName))
@@ -1249,7 +1245,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var getStorageItem = new GetStorageItem(StorageUrl, AuthToken, containerName, storageItemName, requestHeaderFields);
-                var getStorageItemResponse = new ResponseFactoryWithContentBody<GetStorageItemResponse>().Create(new CloudFilesRequest(getStorageItem, UserCredentials.ProxyCredentials));
+                var getStorageItemResponse = _responseFactoryWithBody.CreateStorageItem(new CloudFilesRequest(getStorageItem, UserCredentials.ProxyCredentials));
                
 
                 var metadata = GetMetadata(getStorageItemResponse);
@@ -1332,7 +1328,7 @@ namespace com.mosso.cloudfiles
         /// <param name="storageItemName">The name of the storage object to retrieve</param>
         /// <param name="localFileName">The name to write the file to on your hard drive. </param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public void GetStorageItemAsync(string containerName, string storageItemName, string localFileName)
+        public override void GetStorageItemAsync(string containerName, string storageItemName, string localFileName)
         {
             var thread = new Thread(
                  () =>
@@ -1444,7 +1440,7 @@ namespace com.mosso.cloudfiles
         /// <param name="storageItemName">The name of the storage object to retrieve</param>
         /// <param name="localFileName">The file name to save the storage object into on disk</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public void GetStorageItem(string containerName, string storageItemName, string localFileName)
+        public override void GetStorageItem(string containerName, string storageItemName, string localFileName)
         {
             if (string.IsNullOrEmpty(containerName) ||
                string.IsNullOrEmpty(storageItemName) ||
@@ -1482,7 +1478,7 @@ namespace com.mosso.cloudfiles
         /// <param name="localFileName">The file name to save the storage object into on disk</param>
         /// <param name="requestHeaderFields">A dictionary containing the special headers and their values</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public void GetStorageItem(string containerName, string storageItemName, string localFileName, Dictionary<RequestHeaderFields, string> requestHeaderFields)
+        public override void GetStorageItem(string containerName, string storageItemName, string localFileName, Dictionary<RequestHeaderFields, string> requestHeaderFields)
         {
             if (string.IsNullOrEmpty(containerName) ||
                string.IsNullOrEmpty(storageItemName) ||
@@ -1499,7 +1495,7 @@ namespace com.mosso.cloudfiles
             
             try
             {
-                var getStorageItemResponse = new ResponseFactoryWithContentBody<GetStorageItemResponse>().Create(new CloudFilesRequest(getStorageItem, UserCredentials.ProxyCredentials));
+                var getStorageItemResponse = _responseFactoryWithBody.CreateStorageItem(new CloudFilesRequest(getStorageItem, UserCredentials.ProxyCredentials));
                 foreach (var callback in callbackFuncs)
                 {
                     getStorageItemResponse.Progress += callback;
@@ -1540,7 +1536,7 @@ namespace com.mosso.cloudfiles
         /// <param name="storageItemName">The name of the storage object</param>
         /// <param name="metadata">A dictionary containiner key/value pairs representing the meta data for this storage object</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public void SetStorageItemMetaInformation(string containerName, string storageItemName, Dictionary<string, string> metadata)
+        public override void SetStorageItemMetaInformation(string containerName, string storageItemName, Dictionary<string, string> metadata)
         {
             if (string.IsNullOrEmpty(containerName) ||
                string.IsNullOrEmpty(storageItemName))
@@ -1553,7 +1549,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var setStorageItemInformation = new SetStorageItemMetaInformation(StorageUrl, AuthToken, containerName, storageItemName, metadata);
-                new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(setStorageItemInformation, UserCredentials.ProxyCredentials));
+                new ResponseFactory().Create(new CloudFilesRequest(setStorageItemInformation, UserCredentials.ProxyCredentials));
             }
             catch (WebException we)
             {
@@ -1584,7 +1580,7 @@ namespace com.mosso.cloudfiles
         /// <param name="storageItemName">The name of the storage object</param>
         /// <returns>An instance of StorageItem containing the byte size and meta information associated with the container</returns>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public StorageItemInformation GetStorageItemInformation(string containerName, string storageItemName)
+        public override StorageItemInformation GetStorageItemInformation(string containerName, string storageItemName)
         {
             if (string.IsNullOrEmpty(containerName) ||
                string.IsNullOrEmpty(storageItemName))
@@ -1598,7 +1594,7 @@ namespace com.mosso.cloudfiles
             {
                 var getStorageItemInformation = new GetStorageItemInformation(StorageUrl, AuthToken, containerName, storageItemName);
                 var getStorageItemInformationResponse = 
-                    new ResponseFactory<CloudFilesResponse>()
+                    _responseFactory
                     .Create(new CloudFilesRequest(getStorageItemInformation, UserCredentials.ProxyCredentials));
                 var storageItemInformation = new StorageItemInformation(getStorageItemInformationResponse.Headers);
 
@@ -1629,7 +1625,7 @@ namespace com.mosso.cloudfiles
         /// </code>
         /// </example>
         /// <returns>A list of the public containers</returns>
-        public List<string> GetPublicContainers()
+        public override List<string> GetPublicContainers()
         {
             Log.Info(this, "Getting public containers for user " + UserCredentials.Username);
 
@@ -1637,7 +1633,7 @@ namespace com.mosso.cloudfiles
             {
                 var getPublicContainers = new GetPublicContainers(CdnManagementUrl, AuthToken);
                 var getPublicContainersResponse =
-                    new ResponseFactoryWithContentBody<CloudFilesResponseWithContentBody>().Create(new CloudFilesRequest(getPublicContainers));
+                    _responseFactoryWithBody.Create(new CloudFilesRequest(getPublicContainers));
                 var containerList = getPublicContainersResponse.ContentBody;
                 getPublicContainersResponse.Dispose();
 
@@ -1667,7 +1663,7 @@ namespace com.mosso.cloudfiles
         /// <param name="timeToLiveInSeconds">The maximum time (in seconds) content should be kept alive on the CDN before it checks for freshness.</param>
         /// <returns>A string representing the URL of the public container or null</returns>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public Uri MarkContainerAsPublic(string containerName,int timeToLiveInSeconds)
+        public override Uri MarkContainerAsPublic(string containerName,int timeToLiveInSeconds)
         {
             if (string.IsNullOrEmpty(containerName))
                 throw new ArgumentNullException();
@@ -1680,7 +1676,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var request = new MarkContainerAsPublic(CdnManagementUrl, AuthToken, containerName, timeToLiveInSeconds);
-                var response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(request));
+                var response = _responseFactory.Create(new CloudFilesRequest(request));
                 
                 return response == null ? null : new Uri(response.Headers[Constants.X_CDN_URI]);
             }
@@ -1710,7 +1706,7 @@ namespace com.mosso.cloudfiles
         /// <param name="containerName">The name of the container to mark public</param>
         /// <returns>A string representing the URL of the public container or null</returns>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public Uri MarkContainerAsPublic(string containerName)
+        public override Uri MarkContainerAsPublic(string containerName)
         {
             return MarkContainerAsPublic(containerName, -1);
         }
@@ -1727,7 +1723,7 @@ namespace com.mosso.cloudfiles
         /// </example>
         /// <param name="containerName">The name of the container to mark public</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public void MarkContainerAsPrivate(string containerName)
+        public override void MarkContainerAsPrivate(string containerName)
         {
             if (string.IsNullOrEmpty(containerName))
                 throw new ArgumentNullException();
@@ -1739,7 +1735,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var request = new SetPublicContainerDetails(CdnManagementUrl, AuthToken, containerName, false, -1);
-                new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(request));
+                _responseFactory.Create(new CloudFilesRequest(request));
             }
             catch(WebException we)
             {
@@ -1770,7 +1766,7 @@ namespace com.mosso.cloudfiles
         /// <param name="containerName">The name of the container to mark public</param>
         /// <param name="timeToLiveInSeconds">The maximum time (in seconds) content should be kept alive on the CDN before it checks for freshness.</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public void SetTTLOnPublicContainer(string containerName, int timeToLiveInSeconds)
+        public override void SetTTLOnPublicContainer(string containerName, int timeToLiveInSeconds)
         {
             if (string.IsNullOrEmpty(containerName))
                 throw new ArgumentNullException();
@@ -1783,7 +1779,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var request = new SetPublicContainerDetails(CdnManagementUrl, AuthToken, containerName, true, timeToLiveInSeconds);
-                new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(request));
+               _responseFactory.Create(new CloudFilesRequest(request));
             }
             catch (WebException we)
             {
@@ -1814,7 +1810,7 @@ namespace com.mosso.cloudfiles
         /// <param name="containerName">The name of the container to query about</param>
         /// <returns>An instance of Container with appropriate CDN information or null</returns>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public Container GetPublicContainerInformation(string containerName)
+        public override Container GetPublicContainerInformation(string containerName)
         {
             if (string.IsNullOrEmpty(containerName))
                 throw new ArgumentNullException();
@@ -1826,7 +1822,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var request = new GetPublicContainerInformation(CdnManagementUrl, AuthToken, containerName);
-                var response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(request));
+                var response = _responseFactory.Create(new CloudFilesRequest(request));
 
                 return response == null ? 
                     null 
@@ -1856,7 +1852,7 @@ namespace com.mosso.cloudfiles
         /// connection.SetLoggingOnPublicContainer("container name")
         /// </example>
         /// <param name="publiccontainer">must be an already existig public container</param>
-        public void SetLoggingOnPublicContainer(string publiccontainer, bool loggingenabled)
+        public override void SetLoggingOnPublicContainer(string publiccontainer, bool loggingenabled)
         {
             if (string.IsNullOrEmpty(publiccontainer))
                 throw new ArgumentNullException();
@@ -1868,7 +1864,7 @@ namespace com.mosso.cloudfiles
             {
      
             var request = new SetLoggingToContainerRequest(publiccontainer,AuthToken, CdnManagementUrl , loggingenabled );
-            new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(request));
+            _responseFactory.Create(new CloudFilesRequest(request));
             }
            catch(WebException we)
             {

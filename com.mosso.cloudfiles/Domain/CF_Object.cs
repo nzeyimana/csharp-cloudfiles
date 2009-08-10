@@ -20,16 +20,16 @@ namespace com.mosso.cloudfiles.domain
 
     public class CF_Object : IObject
     {
-        private readonly IConnection connection;
+        private readonly AbstractConnection connection;
         protected Uri publicUrl;
         protected long contentLength;
         protected string etag;
         protected string contentType;
         protected Dictionary<string, string> metadata;
 
-        public CF_Object(IConnection connection, string objectName) : this(connection, objectName, new Dictionary<string, string>()){}
+        public CF_Object(AbstractConnection connection, string objectName) : this(connection, objectName, new Dictionary<string, string>()){}
 
-        public CF_Object(IConnection connection, string objectName, Dictionary<string, string> metadata)
+        public CF_Object(AbstractConnection connection, string objectName, Dictionary<string, string> metadata)
         {
             this.metadata = metadata;
             this.connection = connection;

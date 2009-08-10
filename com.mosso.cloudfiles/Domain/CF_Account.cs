@@ -23,12 +23,12 @@ namespace com.mosso.cloudfiles.domain
 
     public class CF_Account : IAccount
     {
-        private readonly IConnection connection;
+        private readonly AbstractConnection connection;
         protected List<IContainer> containers;
         protected int containerCount;
         protected long bytesUsed;
 
-        public CF_Account(IConnection connection)
+        public CF_Account(AbstractConnection connection)
         {
             this.connection = connection;
             containers = new List<IContainer>();

@@ -42,7 +42,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutContainerSpecs
             
             CreateContainer createContainer = new CreateContainer(storageUrl, authToken, Constants.CONTAINER_NAME);
 
-            IResponse response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(createContainer));
+            IResponse response = new ResponseFactory().Create(new CloudFilesRequest(createContainer));
             Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Created));
 
             DeleteContainer(storageUrl, Constants.CONTAINER_NAME);
@@ -76,12 +76,12 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutContainerSpecs
             
             CreateContainer createContainer = new CreateContainer(storageUrl, authToken, Constants.CONTAINER_NAME);
 
-            IResponse response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(createContainer));
+            IResponse response = new ResponseFactory().Create(new CloudFilesRequest(createContainer));
             Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Created));
 
             createContainer = new CreateContainer(storageUrl, authToken, Constants.CONTAINER_NAME);
 
-            response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(createContainer, null));
+            response = new ResponseFactory().Create(new CloudFilesRequest(createContainer, null));
             Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Accepted));
 
             DeleteContainer(storageUrl, Constants.CONTAINER_NAME);
@@ -91,7 +91,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutContainerSpecs
         {
             DeleteContainer deleteContainer = new DeleteContainer(storageUri, authToken, containerName);
 
-            IResponse response = new ResponseFactory<CloudFilesResponse>().Create(new CloudFilesRequest(deleteContainer));
+            IResponse response = new ResponseFactory().Create(new CloudFilesRequest(deleteContainer));
             Assert.That(response.Status, Is.EqualTo(HttpStatusCode.NoContent));
         }
     }

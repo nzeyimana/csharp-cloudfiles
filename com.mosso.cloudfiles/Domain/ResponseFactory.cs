@@ -16,16 +16,16 @@ namespace com.mosso.cloudfiles.domain
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IResponseFactory<T>
+    public interface IResponseFactory
     {
-        T Create(CloudFilesRequest request);
+        CloudFilesResponse Create(CloudFilesRequest request);
     }
 
     /// <summary>
     /// ResponseFactory
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class ResponseFactory<T> : IResponseFactory<T> where T : IResponse, new()
+    public class ResponseFactory : IResponseFactory 
     {
         public ResponseFactory()
         {
@@ -37,7 +37,7 @@ namespace com.mosso.cloudfiles.domain
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public T Create(CloudFilesRequest request)
+        public CloudFilesResponse Create(CloudFilesRequest request)
         {
             if (request is IRequestWithContentBody)
                 throw new InvalidResponseTypeException(
@@ -54,7 +54,7 @@ namespace com.mosso.cloudfiles.domain
             var statusCode = response.StatusCode;
 
             response.Close();
-            return new T
+            return new CloudFilesResponse()
                        {
                            Headers = headerCollection,
                            Status = statusCode

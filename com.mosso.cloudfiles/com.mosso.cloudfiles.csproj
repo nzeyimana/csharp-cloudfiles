@@ -124,7 +124,7 @@
     <Compile Include="Exceptions\PublicContainerNotFoundException.cs" />
     <Compile Include="Exceptions\StorageItemNotFoundException.cs" />
     <Compile Include="Utils\ObjectNameValidator.cs" />
-    <Compile Include="IConnection.cs" />
+    <Compile Include="AbstractConnection.cs" />
     <Compile Include="Connection.cs" />
     <Compile Include="Domain\StorageItem.cs" />
     <Compile Include="Domain\UserCredentials.cs" />

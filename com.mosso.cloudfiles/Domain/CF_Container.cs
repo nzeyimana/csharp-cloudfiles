@@ -31,12 +31,12 @@ namespace com.mosso.cloudfiles.domain
 
     public class CF_Container : IContainer
     {
-        private readonly IConnection connection;
+        private readonly AbstractConnection connection;
         protected List<IObject> objects;
         protected int objectCount;
         protected long bytesUsed;
 
-        public CF_Container(IConnection connection, string containerName)
+        public CF_Container(AbstractConnection connection, string containerName)
         {
             objects = new List<IObject>();
             Name = containerName;
