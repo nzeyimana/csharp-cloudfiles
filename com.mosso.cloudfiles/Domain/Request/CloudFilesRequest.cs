@@ -4,6 +4,10 @@
 
 using System;
 using System.Net;
+using System.Threading;
+using com.mosso.cloudfiles.domain.request.Interfaces;
+using com.mosso.cloudfiles.domain.response;
+using com.mosso.cloudfiles.domain.response.Interfaces;
 using com.mosso.cloudfiles.utils;
 
 namespace com.mosso.cloudfiles.domain.request
@@ -11,7 +15,7 @@ namespace com.mosso.cloudfiles.domain.request
     /// <summary>
     /// Wraps requests to optionally handle proxy credentials and ssl
     /// </summary>
-    public class CloudFilesRequest
+    public class CloudFilesRequest : ICloudFilesRequest
     {
         private readonly IRequest request;
         private readonly ProxyCredentials proxyCredentials;
@@ -37,7 +41,7 @@ namespace com.mosso.cloudfiles.domain.request
             this.request = request;
             this.proxyCredentials = proxyCredentials;
         }
-
+        
         /// <summary>
         /// RequestType
         /// </summary>
@@ -51,9 +55,10 @@ namespace com.mosso.cloudfiles.domain.request
         /// GetRequest
         /// </summary>
         /// <returns>a HttpWebRequest object that has all the information to make a request against CloudFiles</returns>
-        public HttpWebRequest GetRequest()
+        
+        public ICloudFilesResponse GetResponse()
         {
-            var httpWebRequest = (HttpWebRequest) WebRequest.Create(request.Uri);
+            var httpWebRequest = (HttpWebRequest)System.Net.WebRequest.Create(request.Uri);
             if (request.Headers != null) httpWebRequest.Headers.Add(request.Headers);
 
             httpWebRequest.Method = request.Method;
@@ -64,8 +69,23 @@ namespace com.mosso.cloudfiles.domain.request
             HandleRangeHeader(httpWebRequest);
             HandleRequestBodyFor(httpWebRequest);
             HandleProxyCredentialsFor(httpWebRequest);
+            return new CloudFilesResponse((HttpWebResponse)httpWebRequest.GetResponse());
 
-            return httpWebRequest;
+        }
+
+        public string RequestUri
+        {
+            get { throw new AbandonedMutexException(); }
+        }
+
+        public string Method
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public WebHeaderCollection Headers
+        {
+            get { throw new NotImplementedException(); }
         }
 
         private void HandleRangeHeader(HttpWebRequest webrequest)
@@ -114,5 +134,7 @@ namespace com.mosso.cloudfiles.domain.request
             var stream = httpWebRequest.GetRequestStream();
             requestWithContentBody.ReadFileIntoRequest(stream);
         }
+
+        
     }
 }

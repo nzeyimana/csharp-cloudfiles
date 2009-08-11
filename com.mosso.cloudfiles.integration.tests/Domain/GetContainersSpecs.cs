@@ -18,7 +18,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.RetrieveContainerRequest
             
             using(new TestHelper(authToken, storageUrl))
             {
-                CloudFilesResponseWithContentBody response = null;
+                IResponseWithContentBody response = null;
                 try
                 {
                     GetContainers request = new GetContainers(storageUrl, authToken);
@@ -41,7 +41,6 @@ namespace com.mosso.cloudfiles.integration.tests.domain.RetrieveContainerRequest
         [Test]
         public void Should_return_the_list_of_containers()
         {
-//            Console.WriteLine("Begin listing containers");
 
             
             using (new TestHelper(authToken, storageUrl))
@@ -52,9 +51,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.RetrieveContainerRequest
                     GetContainers request = new GetContainers(storageUrl, authToken);
                     response = new ResponseFactoryWithContentBody().Create(new CloudFilesRequest(request));
                     Assert.That(response.ContentBody.Count, Is.GreaterThan(0));
-//                    foreach (string s in response.ContentBody)
-//                        Console.WriteLine(s);
-//                    Console.WriteLine("End of listing containers");
+
                 }
                 finally
                 {

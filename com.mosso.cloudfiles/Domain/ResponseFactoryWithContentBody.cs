@@ -7,7 +7,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using com.mosso.cloudfiles.domain.request;
+using com.mosso.cloudfiles.domain.request.Interfaces;
 using com.mosso.cloudfiles.domain.response;
+using com.mosso.cloudfiles.domain.response.Interfaces;
 
 namespace com.mosso.cloudfiles.domain
 {
@@ -18,25 +20,24 @@ namespace com.mosso.cloudfiles.domain
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        CloudFilesResponseWithContentBody Create(CloudFilesRequest request);
+        IResponseWithContentBody Create(ICloudFilesRequest request);
 
-        GetStorageItemResponse CreateStorageItem(CloudFilesRequest request);
+        GetStorageItemResponse CreateStorageItem(ICloudFilesRequest request);
     }
 
     /// <summary>
     /// ResponseFactoryWithContentBody
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public class ResponseFactoryWithContentBody : IResponseFactoryWithContentBody
     {
-        private HttpWebResponse httpResponse;
+        private ICloudFilesResponse httpResponse;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public CloudFilesResponseWithContentBody Create(CloudFilesRequest request)
+        public IResponseWithContentBody Create(ICloudFilesRequest request)
         {
             HttpStatusCode statusCode;
             Stream responseStream;
@@ -52,12 +53,12 @@ namespace com.mosso.cloudfiles.domain
             return response;
         }
 
-        private WebHeaderCollection GetHeaderCollection(CloudFilesRequest request, out HttpStatusCode statusCode, out Stream responseStream)
+        private WebHeaderCollection GetHeaderCollection(ICloudFilesRequest request, out HttpStatusCode statusCode, out Stream responseStream)
         {
-            var httpWebRequest = request.GetRequest();
-//            OutputRequestInformation(httpWebRequest);
-            
-            httpResponse = (HttpWebResponse) httpWebRequest.GetResponse();
+             
+
+
+            httpResponse = request.GetResponse();
 
             var headerCollection = httpResponse.Headers;
             statusCode = httpResponse.StatusCode;
@@ -65,15 +66,8 @@ namespace com.mosso.cloudfiles.domain
             return headerCollection;
         }
 
-//        private void OutputRequestInformation(HttpWebRequest request)
-//        {
-//            Console.WriteLine(request.Method +" "+ request.RequestUri);
-//            foreach(var key in request.Headers.AllKeys)
-//            {
-//                Console.WriteLine(key + ": " + request.Headers[key]);
-//            }
-//        }
-        public GetStorageItemResponse CreateStorageItem(CloudFilesRequest request)
+
+        public GetStorageItemResponse CreateStorageItem(ICloudFilesRequest request)
         {
             HttpStatusCode statusCode;
             Stream responseStream;

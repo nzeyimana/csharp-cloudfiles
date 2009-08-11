@@ -14,11 +14,11 @@ namespace com.mosso.cloudfiles.domain.response
         /// <summary>
         /// A property representing the status of the request from cloudfiles
         /// </summary>
-        HttpStatusCode Status { get; set; }
+        HttpStatusCode Status { get;  }
 
         /// <summary>
         /// A collection of key-value pairs representing the headers returned from each request
         /// </summary>
-        WebHeaderCollection Headers { get; set; }
+        WebHeaderCollection Headers { get;  }
     }
 }

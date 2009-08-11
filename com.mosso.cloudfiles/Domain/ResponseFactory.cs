@@ -6,7 +6,9 @@ using System;
 using System.Net;
 using System.Text;
 using com.mosso.cloudfiles.domain.request;
+using com.mosso.cloudfiles.domain.request.Interfaces;
 using com.mosso.cloudfiles.domain.response;
+using com.mosso.cloudfiles.domain.response.Interfaces;
 using com.mosso.cloudfiles.exceptions;
 using com.mosso.cloudfiles.utils;
 
@@ -15,16 +17,14 @@ namespace com.mosso.cloudfiles.domain
     /// <summary>
     /// 
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public interface IResponseFactory
     {
-        CloudFilesResponse Create(CloudFilesRequest request);
+        ICloudFilesResponse Create(ICloudFilesRequest request);
     }
 
     /// <summary>
     /// ResponseFactory
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public class ResponseFactory : IResponseFactory 
     {
         public ResponseFactory()
@@ -37,31 +37,26 @@ namespace com.mosso.cloudfiles.domain
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public CloudFilesResponse Create(CloudFilesRequest request)
+        public ICloudFilesResponse Create(ICloudFilesRequest request)
         {
             if (request is IRequestWithContentBody)
                 throw new InvalidResponseTypeException(
                     "The request type is of IRequestWithContentBody. Content body is expected with this request. ");
 
-            var httpWebRequest = request.GetRequest();
-            Log.Debug(this, OutputRequestInformation(httpWebRequest));
+          
+            Log.Debug(this, OutputRequestInformation(request));
 
 
-            HttpWebResponse response = (HttpWebResponse) httpWebRequest.GetResponse();
+            var response = request.GetResponse();
             Log.Debug(this, OutputResponseInformation(response));
 
-            var headerCollection = response.Headers;
-            var statusCode = response.StatusCode;
-
+            
             response.Close();
-            return new CloudFilesResponse()
-                       {
-                           Headers = headerCollection,
-                           Status = statusCode
-                       };
+            return response;
+                      
         }
 
-        private string OutputRequestInformation(HttpWebRequest request)
+        private string OutputRequestInformation(ICloudFilesRequest request)
         {
             StringBuilder output = new StringBuilder();
             output.Append("\n");
@@ -86,7 +81,7 @@ namespace com.mosso.cloudfiles.domain
             return output.ToString();
         }
 
-        private string OutputResponseInformation(HttpWebResponse response)
+        private string OutputResponseInformation(ICloudFilesResponse response)
         {
             StringBuilder output = new StringBuilder();
             output.Append("\n");
@@ -96,7 +91,7 @@ namespace com.mosso.cloudfiles.domain
             output.Append(response.Method);
             output.Append("\n");
             output.Append("Status Code: ");
-            output.Append(response.StatusCode);
+            output.Append(response.StatusCode.ToString());
             output.Append("\n");
             output.Append("Status Description: ");
             output.Append(response.StatusDescription);

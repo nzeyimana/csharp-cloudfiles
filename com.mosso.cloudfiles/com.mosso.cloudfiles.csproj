@@ -78,6 +78,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Domain\Request\AddLoggingToContainerRequest.cs" />
+    <Compile Include="Domain\Request\Interfaces\IAddToWebRequest.cs" />
+    <Compile Include="Domain\Request\Interfaces\ICloudFilesRequest.cs" />
+    <Compile Include="Domain\Request\WebRequestEngine.cs" />
+    <Compile Include="Domain\Response\Interfaces\ICloudFilesResponse.cs" />
     <Compile Include="Utils\ContainerNameValidator.cs" />
     <Compile Include="Domain\AccountInformation.cs" />
     <Compile Include="Domain\CF_Account.cs" />
