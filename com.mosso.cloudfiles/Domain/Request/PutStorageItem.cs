@@ -139,7 +139,7 @@ namespace com.mosso.cloudfiles.domain.request
             if (!ObjectNameValidator.Validate(remoteStorageItemName))throw new StorageItemNameException();
             
             _fileUrl  = CleanUpFilePath(localFilePath);
-          
+            this.filetosend = new FileStream(_fileUrl, FileMode.Open); //added by ryan as stop gap
 
             
             
@@ -683,12 +683,7 @@ namespace com.mosso.cloudfiles.domain.request
         public void Apply(ICloudFilesRequest request)
         {
             request.Method = "PUT";
-            using (var file = new FileStream(_fileUrl, FileMode.Open))
-            {
-                request.ContentType = this.ContentType();
-                request.ContentLength = file.Length;
-                request.Headers[Constants.ETAG] = StringifyMD5(new MD5CryptoServiceProvider().ComputeHash(file));
-            }
+            
 
             if (_metadata != null && _metadata.Count > 0)
             {
@@ -703,17 +698,27 @@ namespace com.mosso.cloudfiles.domain.request
             if (request.ContentLength < 1)
                 request.SendChunked = true;
 
+            //using (var file = new FileStream(_fileUrl, FileMode.Open))
+           // {
+                request.ContentType = this.ContentType();
+                request.ContentLength = filetosend.Length;
+                request.Headers[Constants.ETAG] = StringifyMD5(new MD5CryptoServiceProvider().ComputeHash(filetosend));
+                filetosend.Seek(0, 0);
+                ReadStreamIntoRequest(request.GetRequestStream());
+           // filetosend.Close();
+           // }
          //   var requestMimeType = request.ContentType;
         //    request.ContentType = String.IsNullOrEmpty(requestMimeType)
            //     ? "application/octet-stream" : requestMimeType;
-               filetosend = new FileStream(_fileUrl, FileMode.Open);
-               ReadStreamIntoRequest(request.GetRequestStream());
+//               filetosend = new FileStream(_fileUrl, FileMode.Open);
+               
                 
            // if (stream.Position == stream.Length)
            //     stream.Seek(0, 0);
 
-            filetosend.Close();
+//            filetosend.Close();
            
         }
+       
     }
 }
