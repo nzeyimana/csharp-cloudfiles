@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net;
 using com.mosso.cloudfiles.domain.response.Interfaces;
 
@@ -17,5 +18,6 @@ namespace com.mosso.cloudfiles.domain.request.Interfaces
         string ContentType { get; set; }
         DateTime IfModifiedSince { get; set; }
         string ETag { get; set; }
+        Stream GetRequestStream();
     }
 }

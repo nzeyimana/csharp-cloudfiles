@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Specialized;
+using System.IO;
 using System.Net;
 using System.Threading;
 using com.mosso.cloudfiles.domain.request.Interfaces;
@@ -60,11 +61,15 @@ namespace com.mosso.cloudfiles.domain.request
             get { return _httpWebRequest.GetType(); }
         }
 
+     
+        public Stream GetRequestStream()
+        {
+            return _httpWebRequest.GetRequestStream();
+        }
         /// <summary>
         /// GetRequest
         /// </summary>
         /// <returns>a HttpWebRequest object that has all the information to make a request against CloudFiles</returns>
-        
         public ICloudFilesResponse GetResponse()
         {
             
@@ -192,7 +197,8 @@ namespace com.mosso.cloudfiles.domain.request
             httpWebRequest.ContentType = String.IsNullOrEmpty(requestMimeType) 
                 ? "application/octet-stream" : requestMimeType;
 
-            var stream = httpWebRequest.GetRequestStream();
+            //var stream = httpWebRequest.GetRequestStream();
+            
             //    requestWithContentBody.ReadFileIntoRequest(stream); //commented by ryan
         }
 

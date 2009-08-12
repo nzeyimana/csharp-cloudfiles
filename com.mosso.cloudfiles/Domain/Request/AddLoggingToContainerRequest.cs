@@ -11,31 +11,31 @@ namespace com.mosso.cloudfiles.domain.request
         private readonly string _cdnManagmentUrl;
         private readonly bool _loggingenabled;
 
-        public SetLoggingToContainerRequest(string publiccontainer, string cdnManagmentUrl, bool loggingenabled )
+        public SetLoggingToContainerRequest(string publiccontainer, string cdnManagmentUrl, bool loggingenabled)
         {
-          
+            _publiccontainer = publiccontainer;
+            _cdnManagmentUrl = cdnManagmentUrl;
+            _loggingenabled = loggingenabled;
             if (String.IsNullOrEmpty(publiccontainer))
                 throw new ArgumentNullException();
 
             if (!ContainerNameValidator.Validate(publiccontainer)) throw new ContainerNameException();
-
-            _publiccontainer = publiccontainer;
-            _cdnManagmentUrl = cdnManagmentUrl;
-            _loggingenabled = loggingenabled;
+           
         }
 
         public Uri CreateUri()
         {
-           return  new Uri(_cdnManagmentUrl + "/" + _publiccontainer.Encode());
+            return  new Uri(_cdnManagmentUrl + "/" + _publiccontainer.Encode());
         }
 
         public void Apply(ICloudFilesRequest request)
         {
-           request.Method = "PUT";
+            request.Method = "PUT";
             string enabled = "False";
             if (_loggingenabled)
                 enabled = "True";
             request.Headers.Add("X-Log-Retention", enabled);
+           
         }
     }
 }

@@ -30,7 +30,7 @@ After you've either installed {msysgit}[http://code.google.com/p/msysgit/downloa
 
 This will create the csharp-cloudfiles directory locally on your computer.  Go into that folder and run:
 
-	build.bat
+	rake 
 
 This will compile the project and give you a resulting dll in ...csharp-cloudfiles/bin/debug/
 
@@ -201,7 +201,13 @@ types are explicitly used in this example. The +var+ keyword could also be used 
 	
 <b>Mark a container as private (remove it from the CDN)</b>
 	connection.MarkContainerAsPrivate("container name");
-	
+
+<b>Enable access logs on public containers</b>
+	connection.SetLoggingOnPublicContainer("container name", true );
+
+<b>Disabled access logs on public containers</b>
+	connection.SetLoggingOnPublicContainer("container name", false);	
+
 <b>Delete item from container</b>
 	connection.DeleteStorageItem("container name", "RemoteStorageItem.txt");
 

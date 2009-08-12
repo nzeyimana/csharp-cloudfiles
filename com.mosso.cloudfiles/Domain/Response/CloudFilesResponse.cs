@@ -88,8 +88,8 @@ namespace com.mosso.cloudfiles.domain.response
 
         public string ETag
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get { return _webResponse.Headers[Constants.ETAG]; }
+            set { _webResponse.Headers[Constants.ETAG] = value; }
         }
 
         public long ContentLength
