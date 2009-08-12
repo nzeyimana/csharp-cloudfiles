@@ -76,6 +76,7 @@ namespace com.mosso.cloudfiles.domain.request
 
          //   HandleIsModifiedSinceHeaderRequestFieldFor(_httpWebRequest);
             HandleRangeHeader(_httpWebRequest);
+            if (_httpWebRequest.ContentLength > 0)
             HandleRequestBodyFor(_httpWebRequest);
             HandleProxyCredentialsFor(_httpWebRequest);
             return new CloudFilesResponse((HttpWebResponse)_httpWebRequest.GetResponse());
@@ -138,8 +139,8 @@ namespace com.mosso.cloudfiles.domain.request
 
         public string ETag
         {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
+            get { return Headers[Constants.ETAG]; }
+            set { Headers.Add(Constants.ETAG, value); }
         }
 
         public string UserAgent
@@ -182,6 +183,7 @@ namespace com.mosso.cloudfiles.domain.request
 
             //    var requestWithContentBody = (IRequestWithContentBody) request;  //commented by ryan
             //    httpWebRequest.ContentLength = requestWithContentBody.ContentLength; //commented by ryan
+            
             httpWebRequest.AllowWriteStreamBuffering = false;
             if(httpWebRequest.ContentLength < 1)
                 httpWebRequest.SendChunked = true;

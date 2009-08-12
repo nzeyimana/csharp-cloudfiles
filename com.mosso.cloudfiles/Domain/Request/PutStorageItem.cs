@@ -696,7 +696,10 @@ namespace com.mosso.cloudfiles.domain.request
                     request.Headers.Add(Constants.META_DATA_HEADER + s, _metadata[s]);
                 }
             }
-           
+            if (stream == null)
+                            stream = new FileStream(_fileUrl, FileMode.Open);
+                            ReadStreamIntoRequest(stream);
+                            stream.Close();
             if (stream.Position == stream.Length)
                 stream.Seek(0, 0);
 

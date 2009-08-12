@@ -47,8 +47,7 @@ namespace com.mosso.cloudfiles
     /// </example>
     public class Connection : AbstractConnection
     {
-        private readonly IResponseFactory _responseFactory;
-        private readonly IResponseFactoryWithContentBody _responseFactoryWithBody;
+         
         
         public delegate void OperationCompleteCallback();
 
@@ -67,8 +66,7 @@ namespace com.mosso.cloudfiles
         public Connection(UserCredentials userCredentials, IResponseFactory responseFactory,
             IResponseFactoryWithContentBody responseFactoryWithBody)
         {
-            _responseFactory = responseFactory;
-            _responseFactoryWithBody = responseFactoryWithBody;
+            _requestfactory = new GenerateRequestByType();
             callbackFuncs = new List<ProgressCallback>();
             Log.EnsureInitialized();
             AuthToken = "";
