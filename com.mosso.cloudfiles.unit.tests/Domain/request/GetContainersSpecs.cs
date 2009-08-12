@@ -12,7 +12,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetContainersSpecs
         [ExpectedException(typeof(ArgumentNullException))]
         public void should_throw_argument_null_exception()
         {
-            new GetContainers(null, "authtoken");
+            new GetContainers(null);
         }
     }
 
@@ -23,32 +23,11 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetContainersSpecs
         [ExpectedException(typeof(ArgumentNullException))]
         public void should_throw_argument_null_exception()
         {
-            new GetContainers("", "authtoken");
+            new GetContainers("");
         }
     }
 
-    [TestFixture]
-    public class when_getting_list_of_containers_and_auth_token_is_null
-    {
-        [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void should_throw_argument_null_exception()
-        {
-            new GetContainers("http://storageurl", null);
-        }
-    }
-
-    [TestFixture]
-    public class when_getting_list_of_containers_and_auth_token_is_emptry_string
-    {
-        [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void should_throw_argument_null_exception()
-        {
-            new GetContainers("http://storageurl", "");
-        }
-    }
-
+ 
     [TestFixture]
     public class when_getting_list_of_containers
     {
@@ -57,25 +36,22 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetContainersSpecs
         [SetUp]
         public void setup()
         {
-            getContainers = new GetContainers("http://storageurl", "authtoken");
+            getContainers = new GetContainers("http://storageurl");
         }
 
         [Test]
         public void should_have_properly_formmated_request_url()
         {
-            Assert.That(getContainers.Uri.ToString(), Is.EqualTo("http://storageurl/"));
+            Assert.That(getContainers.CreateUri().ToString(), Is.EqualTo("http://storageurl/"));
         }
 
         [Test]
         public void should_have_a_http_get_method()
         {
-            Assert.That(getContainers.Method, Is.EqualTo("GET"));
+            Asserts.AssertMethod(getContainers, "GET");
+            
         }
 
-        [Test]
-        public void should_have_a_auth_token_in_the_headers()
-        {
-            Assert.That(getContainers.Headers[utils.Constants.X_AUTH_TOKEN], Is.EqualTo("authtoken"));
-        }
+       
     }
 }

@@ -38,16 +38,16 @@ namespace com.mosso.cloudfiles.integration.tests
 
         public void DeleteItemFromContainer(string storageItemName)
         {
-            var deleteStorageItem = new DeleteStorageItem(storageUrl, authToken, containerName, storageItemName);
-            var deleteStorageItemResponse = new ResponseFactory().Create(new CloudFilesRequest(deleteStorageItem));
+            var deleteStorageItem = new DeleteStorageItem(storageUrl, containerName, storageItemName);
+            var deleteStorageItemResponse = new GenerateRequestByType().Submit(deleteStorageItem, authToken);
             Assert.That(deleteStorageItemResponse.Status, Is.EqualTo(HttpStatusCode.NoContent));
         }
 
         public void AddMetadataToItem(string storageItemName)
         {
             var metadata = new Dictionary<string, string> {{"Test", "test"}, {"Test2", "test2"}};
-            var setStorageItemMetaInformation = new SetStorageItemMetaInformation(storageUrl, authToken, containerName, storageItemName, metadata);
-            var postStorageItemResponse = new ResponseFactory().Create(new CloudFilesRequest(setStorageItemMetaInformation));
+            var setStorageItemMetaInformation = new SetStorageItemMetaInformation(storageUrl, containerName, storageItemName, metadata);
+            var postStorageItemResponse = new GenerateRequestByType().Submit(setStorageItemMetaInformation, authToken);
             Assert.That(postStorageItemResponse.Status, Is.EqualTo(HttpStatusCode.Accepted));
             Assert.That(postStorageItemResponse.Headers["Content-Type"].Contains("text/plain"), Is.True);
             Assert.That(postStorageItemResponse.Headers["Content-Length"], Is.EqualTo("0"));
@@ -60,8 +60,8 @@ namespace com.mosso.cloudfiles.integration.tests
 
         public void PutItemInContainer(string storageItemName, string remoteName)
         {
-            var putStorageItem = new PutStorageItem(storageUrl, authToken, containerName, remoteName, storageItemName);
-            var putStorageItemResponse = new ResponseFactory().Create(new CloudFilesRequest(putStorageItem));
+            var putStorageItem = new PutStorageItem(storageUrl, containerName, remoteName, storageItemName);
+            var putStorageItemResponse = new GenerateRequestByType().Submit(putStorageItem, authToken);
             Assert.That(putStorageItemResponse.Status, Is.EqualTo(HttpStatusCode.Created));
         }
 
@@ -77,15 +77,15 @@ namespace com.mosso.cloudfiles.integration.tests
 
         private void CreateContainer()
         {
-            var createContainer = new CreateContainer(storageUrl, authToken, containerName);
-            var putContainerResponse = new ResponseFactory().Create(new CloudFilesRequest(createContainer));
+            var createContainer = new CreateContainer(storageUrl, containerName);
+            var putContainerResponse = new GenerateRequestByType().Submit(createContainer, authToken);
             Assert.That(putContainerResponse.Status, Is.EqualTo(HttpStatusCode.Created));
         }
 
         private void DeleteContainer()
         {
-            var deleteContainer = new DeleteContainer(storageUrl, authToken, containerName);
-            var deleteContainerResponse = new ResponseFactory().Create(new CloudFilesRequest(deleteContainer));
+            var deleteContainer = new DeleteContainer(storageUrl, containerName);
+            var deleteContainerResponse = new GenerateRequestByType().Submit(deleteContainer, authToken);
             Assert.That(deleteContainerResponse.Status, Is.EqualTo(HttpStatusCode.NoContent));
         }
 

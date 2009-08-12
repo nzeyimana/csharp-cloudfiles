@@ -3,21 +3,29 @@
 ///
 
 using System;
+using com.mosso.cloudfiles.domain.request.Interfaces;
 
 namespace com.mosso.cloudfiles.domain.request
 {
-    public class GetPublicContainers : BaseRequest
+    public class GetPublicContainers : IAddToWebRequest
     {
-        public GetPublicContainers(string cdnManagementUrl, string authToken)
+        private readonly string _cdnManagementUrl;
+
+        public GetPublicContainers(string cdnManagementUrl)
         {
-            if (string.IsNullOrEmpty(cdnManagementUrl)
-               || string.IsNullOrEmpty(authToken))
+            _cdnManagementUrl = cdnManagementUrl;
+            if (string.IsNullOrEmpty(cdnManagementUrl))
                 throw new ArgumentNullException();
+        }
 
-            Method = "GET";
+        public Uri CreateUri()
+        {
+            return  new Uri(_cdnManagementUrl + "?enabled_only=true");
+        }
 
-            AddAuthTokenToHeaders(authToken);
-            Uri = new Uri(cdnManagementUrl + "?enabled_only=true");
+        public void Apply(ICloudFilesRequest request)
+        {
+            request.Method = "GET";
         }
     }
 }

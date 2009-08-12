@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net;
 using com.mosso.cloudfiles.domain;
 using com.mosso.cloudfiles.domain.request;
@@ -19,9 +20,9 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerInformationS
             using (TestHelper testHelper = new TestHelper(authToken, storageUrl))
             {
                 testHelper.PutItemInContainer(Constants.StorageItemName, Constants.StorageItemName);
-                GetContainerInformation getContainerInformation = new GetContainerInformation(storageUrl, authToken, Constants.CONTAINER_NAME);
+                GetContainerInformation getContainerInformation = new GetContainerInformation(storageUrl,  Constants.CONTAINER_NAME);
 
-                var informationResponse = new ResponseFactory().Create(new CloudFilesRequest(getContainerInformation));
+                var informationResponse = new GenerateRequestByType().Submit(getContainerInformation, authToken);
                 Assert.That(informationResponse.Status, Is.EqualTo(HttpStatusCode.NoContent));
                 Assert.That(informationResponse.Headers[Constants.XContainerObjectCount], Is.EqualTo("1"));
                 Assert.That(informationResponse.Headers[Constants.XContainerBytesUsed], (Is.Not.Null));
@@ -37,9 +38,9 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerInformationS
             using (TestHelper testHelper = new TestHelper(authToken, storageUrl, containerName))
             {
                 testHelper.PutItemInContainer(Constants.StorageItemName, Constants.StorageItemName);
-                var getContainerInformation = new GetContainerInformation(storageUrl, authToken, containerName);
+                var getContainerInformation = new GetContainerInformation(storageUrl,  containerName);
 
-                var informationResponse = new ResponseFactory().Create(new CloudFilesRequest(getContainerInformation));
+                var informationResponse = new GenerateRequestByType().Submit(getContainerInformation);
                 Assert.That(informationResponse.Status, Is.EqualTo(HttpStatusCode.NoContent));
                 Assert.That(informationResponse.Headers[Constants.XContainerObjectCount], Is.EqualTo("1"));
                 Assert.That(informationResponse.Headers[Constants.XContainerBytesUsed], (Is.Not.Null));
@@ -51,9 +52,9 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerInformationS
         [ExpectedException(typeof (WebException))]
         public void Should_return_not_found_when_the_container_does_not_exist()
         {
-            var getContainerInformation = new GetContainerInformation(storageUrl, authToken, "Idonthasacontainer");
+            var getContainerInformation = new GetContainerInformation(storageUrl, "Idonthasacontainer");
 
-            new ResponseFactory().Create(new CloudFilesRequest(getContainerInformation));
+            new GenerateRequestByType().Submit(getContainerInformation, authToken);
             Assert.Fail("Expecting a 404 error when trying to retrieve data about a non-existent container");
         }
 
@@ -61,9 +62,9 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerInformationS
         [ExpectedException(typeof (ContainerNameException))]
         public void Should_throw_an_exception_when_the_container_name_exceeds_the_maximum_allowed_length()
         {
-            var getContainerInformation = new GetContainerInformation(storageUrl, authToken, new string('a', Constants.MaximumContainerNameLength + 1));
+            var getContainerInformation = new GetContainerInformation(storageUrl, new string('a', Constants.MaximumContainerNameLength + 1));
 
-            new ResponseFactory().Create(new CloudFilesRequest(getContainerInformation));
+            new GenerateRequestByType().Submit(getContainerInformation, authToken);
             Assert.Fail("Expecting a ContainerNameException");
         }
 
@@ -71,21 +72,14 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerInformationS
         [ExpectedException(typeof (ArgumentNullException))]
         public void Should_throw_an_exception_if_the_storage_url_is_null()
         {
-            new GetContainerInformation(null, "whatever", "a");
+            new GetContainerInformation(null, "a");
         }
 
         [Test]
         [ExpectedException(typeof (ArgumentNullException))]
         public void Should_throw_an_exception_if_the_container_name_is_null()
         {
-            new GetContainerInformation("a", "whatever", null);
-        }
-
-        [Test]
-        [ExpectedException(typeof (ArgumentNullException))]
-        public void Should_throw_an_exception_if_the_auth_token_is_null()
-        {
-            new GetContainerInformation("a", null, "a");
+            new GetContainerInformation("a",  null);
         }
     }
 
@@ -100,9 +94,9 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerInformationS
             using (TestHelper testHelper = new TestHelper(authToken, storageUrl))
             {
                 testHelper.PutItemInContainer(Constants.StorageItemNameJpg);
-                var getContainerInformation = new GetContainerInformationSerialized(storageUrl, authToken, Constants.CONTAINER_NAME, Format.JSON);
+                var getContainerInformation = new GetContainerInformationSerialized(storageUrl,  Constants.CONTAINER_NAME, Format.JSON);
 
-                var jsonResponse = new ResponseFactoryWithContentBody().Create(new CloudFilesRequest(getContainerInformation));
+                var jsonResponse = new GenerateRequestByType().Submit(getContainerInformation, authToken);
                 Assert.That(jsonResponse.Status, Is.EqualTo(HttpStatusCode.OK));
                 var jsonReturnValue = String.Join("", jsonResponse.ContentBody.ToArray());
                 jsonResponse.Dispose();
@@ -124,9 +118,9 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerInformationS
             using (TestHelper testHelper = new TestHelper(authToken, storageUrl))
             {
                 testHelper.PutItemInContainer(Constants.StorageItemNameJpg);
-                var getContainerInformation = new GetContainerInformationSerialized(storageUrl, authToken, Constants.CONTAINER_NAME, Format.XML);
+                var getContainerInformation = new GetContainerInformationSerialized(storageUrl,  Constants.CONTAINER_NAME, Format.XML);
 
-                var xmlResponse = new ResponseFactoryWithContentBody().Create(new CloudFilesRequest(getContainerInformation));
+                var xmlResponse = new GenerateRequestByType().Submit(getContainerInformation, authToken);
                 Assert.That(xmlResponse.Status, Is.EqualTo(HttpStatusCode.OK));
                 var xmlReturnValue = String.Join("", xmlResponse.ContentBody.ToArray());
                 xmlResponse.Dispose();

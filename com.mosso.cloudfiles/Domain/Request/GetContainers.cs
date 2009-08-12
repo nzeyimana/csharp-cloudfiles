@@ -3,29 +3,38 @@
 ///
 
 using System;
+using com.mosso.cloudfiles.domain.request.Interfaces;
 
 namespace com.mosso.cloudfiles.domain.request
 {
     /// <summary>
     /// GetContainers
     /// </summary>
-    public class GetContainers : BaseRequest
+    public class GetContainers : IAddToWebRequest
     {
+        private readonly string _storageUrl;
+
         /// <summary>
         /// GetContainers constructor
         /// </summary>
         /// <param name="storageUrl">the customer unique url to interact with cloudfiles</param>
-        /// <param name="authToken">the customer unique token obtained after valid authentication necessary for all cloudfiles ReST interaction</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public GetContainers(string storageUrl, string authToken)
+        public GetContainers(string storageUrl)
         {
-            if (string.IsNullOrEmpty(storageUrl)
-                || string.IsNullOrEmpty(authToken))
-                throw new ArgumentNullException();
+            _storageUrl = storageUrl;
+            if (string.IsNullOrEmpty(storageUrl))
 
-            Uri = new Uri(storageUrl);
-            Method = "GET";
-            AddAuthTokenToHeaders(authToken);
+                throw new ArgumentNullException();
+        }
+
+        public Uri CreateUri()
+        {
+            return new Uri(_storageUrl);
+        }
+
+        public void Apply(ICloudFilesRequest request)
+        {
+            request.Method = "GET";
         }
     }
 }

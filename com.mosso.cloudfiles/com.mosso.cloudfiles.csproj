@@ -80,14 +80,15 @@
     <Compile Include="Domain\Request\AddLoggingToContainerRequest.cs" />
     <Compile Include="Domain\Request\Interfaces\IAddToWebRequest.cs" />
     <Compile Include="Domain\Request\Interfaces\ICloudFilesRequest.cs" />
-    <Compile Include="Domain\Request\WebRequestEngine.cs" />
+    <Compile Include="Domain\RequestFactory.cs" />
+    <Compile Include="Domain\GenerateRequestByType.cs" />
+    <Compile Include="Domain\WebRequestEngine.cs" />
     <Compile Include="Domain\Response\Interfaces\ICloudFilesResponse.cs" />
     <Compile Include="Utils\ContainerNameValidator.cs" />
     <Compile Include="Domain\AccountInformation.cs" />
     <Compile Include="Domain\CF_Account.cs" />
     <Compile Include="Domain\CF_Container.cs" />
     <Compile Include="Domain\CF_Object.cs" />
-    <Compile Include="Domain\Request\BaseRequest.cs" />
     <Compile Include="Domain\Request\GetAccountInformation.cs" />
     <Compile Include="Domain\Request\GetPublicContainerInformation.cs" />
     <Compile Include="Domain\Request\GetPublicContainers.cs" />
@@ -110,7 +111,6 @@
     <Compile Include="Domain\Response\GetStorageItemResponse.cs" />
     <Compile Include="Domain\Request\GetContainerInformation.cs" />
     <Compile Include="Domain\Request\GetStorageItemInformation.cs" />
-    <Compile Include="Domain\Request\IRequestWithContentBody.cs" />
     <Compile Include="Domain\Response\IResponse.cs" />
     <Compile Include="Domain\Request\GetContainers.cs" />
     <Compile Include="Domain\Response\IResponseWithContentBody.cs" />
@@ -138,7 +138,6 @@
     <Compile Include="Exceptions\MetaValueLengthException.cs" />
     <Compile Include="Exceptions\StorageItemNameException.cs" />
     <Compile Include="Utils\Constants.cs" />
-    <Compile Include="Domain\Request\IRequest.cs" />
     <Compile Include="Exceptions\AuthenticationFailedException.cs" />
     <Compile Include="Utils\Log.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

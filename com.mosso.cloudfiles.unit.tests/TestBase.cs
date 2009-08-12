@@ -26,9 +26,8 @@ namespace com.mosso.cloudfiles.unit.tests
                         Constants.CREDENTIALS_CLOUD_VERSION,
                         Constants.CREDENTIALS_ACCOUNT_NAME));
 
-            IResponse response =
-                new ResponseFactory().Create(
-                    new CloudFilesRequest(request));
+            IResponse response = new GenerateRequestByType().Submit(request, authToken);
+                ;
 
             storageUrl = response.Headers[utils.Constants.X_STORAGE_URL];
             authToken = response.Headers[utils.Constants.X_AUTH_TOKEN];

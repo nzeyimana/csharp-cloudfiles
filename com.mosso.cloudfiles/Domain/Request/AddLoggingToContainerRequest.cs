@@ -1,26 +1,41 @@
 using System;
+using com.mosso.cloudfiles.domain.request.Interfaces;
 using com.mosso.cloudfiles.exceptions;
 using com.mosso.cloudfiles.utils;
 
 namespace com.mosso.cloudfiles.domain.request
 {
-    public class SetLoggingToContainerRequest : BaseRequest
+    public class SetLoggingToContainerRequest : IAddToWebRequest
     {
+        private readonly string _publiccontainer;
+        private readonly string _cdnManagmentUrl;
+        private readonly bool _loggingenabled;
 
-        public SetLoggingToContainerRequest(string publiccontainer, string AuthToken,  string cdnManagmentUrl, bool loggingenabled )
+        public SetLoggingToContainerRequest(string publiccontainer, string cdnManagmentUrl, bool loggingenabled )
         {
+          
             if (String.IsNullOrEmpty(publiccontainer))
                 throw new ArgumentNullException();
 
             if (!ContainerNameValidator.Validate(publiccontainer)) throw new ContainerNameException();
 
-            Uri = new Uri(cdnManagmentUrl + "/" + publiccontainer.Encode());
-            Method = "PUT";
+            _publiccontainer = publiccontainer;
+            _cdnManagmentUrl = cdnManagmentUrl;
+            _loggingenabled = loggingenabled;
+        }
+
+        public Uri CreateUri()
+        {
+           return  new Uri(_cdnManagmentUrl + "/" + _publiccontainer.Encode());
+        }
+
+        public void Apply(ICloudFilesRequest request)
+        {
+           request.Method = "PUT";
             string enabled = "False";
-            if (loggingenabled)
+            if (_loggingenabled)
                 enabled = "True";
-            headers.Add("X-Log-Retention", enabled);
-            AddAuthTokenToHeaders(AuthToken);
+            request.Headers.Add("X-Log-Retention", enabled);
         }
     }
 }

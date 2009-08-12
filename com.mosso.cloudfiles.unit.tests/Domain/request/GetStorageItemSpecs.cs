@@ -15,21 +15,21 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request
         [ExpectedException(typeof(ArgumentNullException))]
         public void Should_throw_an_exception_when_the_storage_url_is_null()
         {
-            new GetStorageItem(null, "a", "a", "a");
+            new GetStorageItem(null, "a", "a");
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Should_throw_an_exception_when_the_container_bame_is_null()
         {
-            new GetStorageItem("a", null, "a", "a");
+            new GetStorageItem("a", null, "a");
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void Should_throw_an_exception_when_the_storage_object_name_is_null()
         {
-            new GetStorageItem("a", "a", null, "a");
+            new GetStorageItem("a", "a", null);
         }
 
         [Test]
@@ -56,8 +56,9 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request
         [Test]
         public void Should_add_if_match_request_field_header_to_request_successfully()
         {
-            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "authtoken", "NotEmptyString", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
-            Assert.That(getStorageItem.Headers[EnumHelper.GetDescription(RequestHeaderFields.IfMatch)], Is.EqualTo(DUMMY_ETAG));
+            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "NotEmptyString", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
+            Asserts.AssertHeaders(getStorageItem, EnumHelper.GetDescription(RequestHeaderFields.IfMatch), DUMMY_ETAG);
+
         }
     }
 
@@ -77,8 +78,10 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request
         [Test]
         public void Should_add_if_none_match_request_field_header_to_request_successfully()
         {
-            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "authtoken", "NotEmptyString", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
-            Assert.That(getStorageItem.Headers[EnumHelper.GetDescription(RequestHeaderFields.IfNoneMatch)], Is.EqualTo(DUMMY_ETAG));
+            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "NotEmptyString", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
+            Asserts.AssertHeaders(getStorageItem, EnumHelper.GetDescription(RequestHeaderFields.IfNoneMatch), DUMMY_ETAG);
+            
+            
         }
     }
 
@@ -101,16 +104,19 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request
         {
             requestHeaderFields[RequestHeaderFields.IfModifiedSince] = "test_jibberish";
 
-            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "authtoken", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
-            Assert.That(getStorageItem.Headers[EnumHelper.GetDescription(RequestHeaderFields.IfModifiedSince)], Is.EqualTo(modifiedDateTime));
+            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
+            Asserts.AssertHeaders(getStorageItem, EnumHelper.GetDescription(RequestHeaderFields.IfModifiedSince), modifiedDateTime);
+           
         }
 
         [Test]
         public void Should_add_if_modified_since_request_field_to_request_ifmodifiedsince_property_successfully()
         {
-            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "authtoken", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
-            Assert.That(getStorageItem.ModifiedSince.ToShortDateString(), Is.EqualTo(modifiedDateTime.ToShortDateString()));
-            Assert.That(getStorageItem.ModifiedSince.ToShortTimeString(), Is.EqualTo(modifiedDateTime.ToShortTimeString()));
+            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
+            var request = Asserts.GetMock(getStorageItem);
+            request.VerifySet(x=>x.IfModifiedSince= modifiedDateTime);
+           // Assert.That(request.ModifiedSince.ToShortDateString(), Is.EqualTo(modifiedDateTime.ToShortDateString()));
+            //Assert.That(request.ModifiedSince.ToShortTimeString(), Is.EqualTo(modifiedDateTime.ToShortTimeString()));
         }
     }
 
@@ -133,15 +139,17 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request
         {
             requestHeaderFields[RequestHeaderFields.IfModifiedSince] = "test_jibberish";
 
-            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "authtoken", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
-            Assert.That(getStorageItem.Headers[EnumHelper.GetDescription(RequestHeaderFields.IfUnmodifiedSince)], Is.EqualTo(modifiedDateTime));
+            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
+            Asserts.AssertHeaders(getStorageItem, EnumHelper.GetDescription(RequestHeaderFields.IfUnmodifiedSince), modifiedDateTime);
+
         }
 
         [Test]
         public void Should_add_if_unmodified_since_request_field_to_request_ifmodifiedsince_property_successfully()
         {
-            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "authtoken", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
-            Assert.That(getStorageItem.Headers[EnumHelper.GetDescription(RequestHeaderFields.IfUnmodifiedSince)], Is.EqualTo(String.Format("{0:r}", modifiedDateTime)));
+            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
+            Asserts.AssertHeaders(getStorageItem, EnumHelper.GetDescription(RequestHeaderFields.IfUnmodifiedSince), String.Format("{0:r}", modifiedDateTime));
+          //  Assert.That(getStorageItem.Headers[EnumHelper.GetDescription(RequestHeaderFields.IfUnmodifiedSince)], Is.EqualTo(String.Format("{0:r}", modifiedDateTime)));
         }
     }
 
@@ -162,32 +170,39 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request
         {
             requestHeaderFields[RequestHeaderFields.Range] = "a-5";
 
-            new GetStorageItem("http://storageurl", "authtoken", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
+            new GetStorageItem("http://storageurl", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
         }
 
         [Test]
         public void Should_have_a_range_from_property_if_the_range_from_property_is_set_correctly()
         {
             requestHeaderFields[RequestHeaderFields.Range] = "10-";
-            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "authtoken", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
-            Assert.That(getStorageItem.RangeFrom, Is.EqualTo(10));
+            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
+            var request = Asserts.GetMock(getStorageItem);
+            request.VerifySet(x=>x.RangeFrom=10);
+           // Assert.That(request.RangeFrom, Is.EqualTo(10));
         }
 
         [Test]
         public void Should_have_a_negative_range_to_property_if_the_range_to_property_is_set_correctly_and_no_range_from_is_specified()
         {
             requestHeaderFields[RequestHeaderFields.Range] = "-10";
-            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "authtoken", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
-            Assert.That(getStorageItem.RangeTo, Is.EqualTo(-10));
+            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
+            var request = Asserts.GetMock(getStorageItem);
+            request.VerifySet(x => x.RangeTo = -10);
+            // Assert.That(getStorageItem.RangeTo, Is.EqualTo(-10));
         }
 
         [Test]
         public void Should_have_range_from_and_range_to_if_both_are_set_and_are_valid_integers()
         {
             requestHeaderFields[RequestHeaderFields.Range] = "1-10";
-            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "authtoken", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
-            Assert.That(getStorageItem.RangeFrom, Is.EqualTo(1));   
-            Assert.That(getStorageItem.RangeTo, Is.EqualTo(10));
+            GetStorageItem getStorageItem = new GetStorageItem("http://storageurl", "containername", Constants.STORAGE_ITEM_NAME, requestHeaderFields);
+            var request = Asserts.GetMock(getStorageItem);
+            request.VerifySet(x => x.RangeFrom = 1);
+            request.VerifySet(x => x.RangeTo = 10);
+            //Assert.That(getStorageItem.RangeFrom, Is.EqualTo(1));   
+           // Assert.That(getStorageItem.RangeTo, Is.EqualTo(10));
         }
     }
 }

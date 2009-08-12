@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Xml;
 using com.mosso.cloudfiles.domain;
@@ -29,8 +30,8 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetAccountSpecs
             using (TestHelper testHelper = new TestHelper(authToken, storageUrl))
             {
                 testHelper.PutItemInContainer(Constants.StorageItemName, Constants.StorageItemName);
-                GetAccountInformation getAccountInformation = new GetAccountInformation(storageUrl, authToken);
-                var response = new ResponseFactory().Create(new CloudFilesRequest(getAccountInformation));
+                GetAccountInformation getAccountInformation = new GetAccountInformation(storageUrl);
+                var response =new GenerateRequestByType().Submit(getAccountInformation, authToken);
                 Assert.That(response.Headers[Constants.XAccountBytesUsed], Is.Not.Null);
                 Assert.That(response.Headers[Constants.XAccountContainerCount], Is.Not.Null);
                 testHelper.DeleteItemFromContainer(Constants.StorageItemName);
@@ -48,8 +49,8 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetAccountSpecs
 
             try
             {
-                GetAccountInformation getAccountInformation = new GetAccountInformation(storageUrl.Replace("_", "FAIL"), authToken);
-                new ResponseFactory().Create(new CloudFilesRequest(getAccountInformation));
+                GetAccountInformation getAccountInformation = new GetAccountInformation(storageUrl.Replace("_", "FAIL"));
+                new GenerateRequestByType().Submit(getAccountInformation, authToken);
             }
             catch (WebException we)
             {
@@ -70,8 +71,8 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetAccountSpecs
         [Test]
         public void should_return_204_no_content_when_the_account_has_no_containers()
         {
-            GetAccountInformation getAccountInformation = new GetAccountInformation(storageUrl, authToken);
-            var response = new ResponseFactory().Create(new CloudFilesRequest(getAccountInformation));
+            GetAccountInformation getAccountInformation = new GetAccountInformation(storageUrl);
+            var response = new GenerateRequestByType().Submit(getAccountInformation, authToken);
             Assert.That(response.Status, Is.EqualTo(HttpStatusCode.NoContent));
         }
     }
@@ -89,8 +90,8 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetAccountSpecs
                 {
                     testHelper.PutItemInContainer(Constants.StorageItemName);
 
-                    var getAccountInformationJson = new GetAccountInformationSerialized(storageUrl, authToken, Format.JSON);
-                    var getAccountInformationJsonResponse = new ResponseFactoryWithContentBody().Create(new CloudFilesRequest(getAccountInformationJson));
+                    var getAccountInformationJson = new GetAccountInformationSerialized(storageUrl,  Format.JSON);
+                    var getAccountInformationJsonResponse = new GenerateRequestByType().Submit(getAccountInformationJson, authToken);
 
                     if(getAccountInformationJsonResponse.ContentBody.Count == 0)
                         Assert.Fail("No content body returned in response");
@@ -128,8 +129,8 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetAccountSpecs
         [Test]
         public void should_return_empty_brackets_and_ok_status_200()
         {
-            var getAccountInformationJson = new GetAccountInformationSerialized(storageUrl, authToken, Format.JSON);
-            var getAccountInformationJsonResponse = new ResponseFactoryWithContentBody().Create(new CloudFilesRequest(getAccountInformationJson));
+            var getAccountInformationJson = new GetAccountInformationSerialized(storageUrl,  Format.JSON);
+            var getAccountInformationJsonResponse = new GenerateRequestByType().Submit(getAccountInformationJson, authToken);
             Assert.That(getAccountInformationJsonResponse.Status, Is.EqualTo(HttpStatusCode.OK));
             var contentBody = String.Join("",getAccountInformationJsonResponse.ContentBody.ToArray());
             getAccountInformationJsonResponse.Dispose();
@@ -151,8 +152,8 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetAccountSpecs
                 {
                     testHelper.PutItemInContainer(Constants.StorageItemName);
 
-                    var accountInformationXml = new GetAccountInformationSerialized(storageUrl, authToken, Format.XML);
-                    var getAccountInformationXmlResponse = new ResponseFactoryWithContentBody().Create(new CloudFilesRequest(accountInformationXml));
+                    var accountInformationXml = new GetAccountInformationSerialized(storageUrl,  Format.XML);
+                    var getAccountInformationXmlResponse = new GenerateRequestByType().Submit(accountInformationXml,authToken);
 
                     if (getAccountInformationXmlResponse.ContentBody.Count == 0)
                         Assert.Fail("No content body returned in response");
@@ -192,8 +193,8 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetAccountSpecs
         [Test]
         public void should_return_account_name_and_ok_status_200()
         {
-            var accountInformationXml = new GetAccountInformationSerialized(storageUrl, authToken, Format.XML);
-            var getAccountInformationXmlResponse = new ResponseFactoryWithContentBody().Create(new CloudFilesRequest(accountInformationXml));
+            var accountInformationXml = new GetAccountInformationSerialized(storageUrl, Format.XML);
+            var getAccountInformationXmlResponse =new GenerateRequestByType().Submit(accountInformationXml, authToken);
             Assert.That(getAccountInformationXmlResponse.Status, Is.EqualTo(HttpStatusCode.OK));
 
             var contentBody = "";

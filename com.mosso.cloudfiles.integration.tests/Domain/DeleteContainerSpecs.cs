@@ -16,8 +16,8 @@ namespace com.mosso.cloudfiles.integration.tests.domain.DeleteContainerSpecs
         public void Should_return_no_content_when_the_container_exists()
         {
             PutContainer(storageUrl, Constants.CONTAINER_NAME);
-            var deleteContainer = new DeleteContainer(storageUrl, authToken, Constants.CONTAINER_NAME);
-            var response = new ResponseFactory().Create(new CloudFilesRequest(deleteContainer));
+            var deleteContainer = new DeleteContainer(storageUrl, Constants.CONTAINER_NAME);
+            var response = new GenerateRequestByType().Submit(deleteContainer, authToken);
             Assert.That(response.Status, Is.EqualTo(HttpStatusCode.NoContent));
         }
 
@@ -25,9 +25,9 @@ namespace com.mosso.cloudfiles.integration.tests.domain.DeleteContainerSpecs
         [ExpectedException(typeof (WebException))]
         public void Should_return_404_when_container_does_not_exist()
         {
-            var deleteContainer = new DeleteContainer(storageUrl, authToken, Guid.NewGuid().ToString());
+            var deleteContainer = new DeleteContainer(storageUrl,  Guid.NewGuid().ToString());
 
-            new ResponseFactory().Create(new CloudFilesRequest(deleteContainer));
+             new GenerateRequestByType().Submit(deleteContainer, authToken);
             Assert.Fail("404 Not found exception expected");
         }
 
@@ -39,10 +39,11 @@ namespace com.mosso.cloudfiles.integration.tests.domain.DeleteContainerSpecs
             {
                 using (new TestHelper(authToken, storageUrl))
                 {
-                    var putStorageItem = new PutStorageItem(storageUrl, authToken, Constants.CONTAINER_NAME, Constants.StorageItemName, Constants.StorageItemName);
-                    Assert.That(putStorageItem.ContentLength, Is.GreaterThan(0));
+                    var putStorageItem = new PutStorageItem(storageUrl, Constants.CONTAINER_NAME, Constants.StorageItemName, Constants.StorageItemName);
+                    
+                 //   Assert.That(putStorageItem.ContentLength, Is.GreaterThan(0));
 
-                    var putStorageItemResponse = new ResponseFactory().Create(new CloudFilesRequest(putStorageItem));
+                  var putStorageItemResponse=  new GenerateRequestByType().Submit(putStorageItem, authToken);
                     Assert.That(putStorageItemResponse.Status, Is.EqualTo(HttpStatusCode.Created));
                 }
                 Assert.Fail("409 conflict expected");
@@ -54,10 +55,9 @@ namespace com.mosso.cloudfiles.integration.tests.domain.DeleteContainerSpecs
             }
             finally
             {
-                new ResponseFactory().Create(new CloudFilesRequest(
-                    new DeleteStorageItem(storageUrl, authToken, Constants.CONTAINER_NAME, Constants.StorageItemName)));
-                new ResponseFactory().Create(new CloudFilesRequest(
-                    new DeleteContainer(storageUrl, authToken, Constants.CONTAINER_NAME)));
+                var genrequest = new GenerateRequestByType();
+                  genrequest.Submit( new DeleteStorageItem(storageUrl, Constants.CONTAINER_NAME, Constants.StorageItemName),authToken);
+                genrequest.Submit(new DeleteContainer(storageUrl, Constants.CONTAINER_NAME), authToken);
             }
         }
 
@@ -69,10 +69,10 @@ namespace com.mosso.cloudfiles.integration.tests.domain.DeleteContainerSpecs
             {
                 using (new TestHelper(authToken, storageUrl, containerName))
                 {
-                    var putStorageItem = new PutStorageItem(storageUrl, authToken, containerName, Constants.StorageItemName, Constants.StorageItemName);
-                    Assert.That(putStorageItem.ContentLength, Is.GreaterThan(0));
+                    var putStorageItem = new PutStorageItem(storageUrl, containerName, Constants.StorageItemName, Constants.StorageItemName);
+                 //   Assert.That(putStorageItem.ContentLength, Is.GreaterThan(0));
 
-                    var putStorageItemResponse = new ResponseFactory().Create(new CloudFilesRequest(putStorageItem));
+                    var putStorageItemResponse = new GenerateRequestByType().Submit(putStorageItem, authToken);
                     Assert.That(putStorageItemResponse.Status, Is.EqualTo(HttpStatusCode.Created));
                 }
                 Assert.Fail("ContainerNameException expected");
@@ -87,28 +87,23 @@ namespace com.mosso.cloudfiles.integration.tests.domain.DeleteContainerSpecs
         [ExpectedException(typeof (ArgumentNullException))]
         public void Should_throw_an_exception_when_the_storage_url_is_null()
         {
-            new DeleteContainer(null, "a", "a");
+            new DeleteContainer(null, "a");
         }
 
         [Test]
         [ExpectedException(typeof (ArgumentNullException))]
         public void Should_throw_an_exception_when_the_container_name_is_null()
         {
-            new DeleteContainer("a", "a", null);
+            new DeleteContainer("a", null);
         }
 
-        [Test]
-        [ExpectedException(typeof (ArgumentNullException))]
-        public void Should_throw_an_exception_when_the_auth_token_is_null()
-        {
-            new DeleteContainer("a", null, "a");
-        }
+        
 
         private void PutContainer(string storageUri, String containerName)
         {
-            var createContainer = new CreateContainer(storageUri, authToken, containerName);
+            var createContainer = new CreateContainer(storageUri, containerName);
 
-            IResponse response = new ResponseFactory().Create(new CloudFilesRequest(createContainer));
+            IResponse response = new GenerateRequestByType().Submit(createContainer, authToken);
             Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Created));
         }
     }

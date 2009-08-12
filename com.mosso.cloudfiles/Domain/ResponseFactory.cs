@@ -39,7 +39,8 @@ namespace com.mosso.cloudfiles.domain
         /// <returns></returns>
         public ICloudFilesResponse Create(ICloudFilesRequest request)
         {
-            if (request is IRequestWithContentBody)
+            // this may be very very wrong look at tests closely
+            if (request.ContentLength>0)
                 throw new InvalidResponseTypeException(
                     "The request type is of IRequestWithContentBody. Content body is expected with this request. ");
 

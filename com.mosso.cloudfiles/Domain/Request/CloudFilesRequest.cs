@@ -3,6 +3,7 @@
 ///
 
 using System;
+using System.Collections.Specialized;
 using System.Net;
 using System.Threading;
 using com.mosso.cloudfiles.domain.request.Interfaces;
@@ -17,14 +18,22 @@ namespace com.mosso.cloudfiles.domain.request
     /// </summary>
     public class CloudFilesRequest : ICloudFilesRequest
     {
-        private readonly IRequest request;
+        private HttpWebRequest _httpWebRequest;
         private readonly ProxyCredentials proxyCredentials;
+       
 
+        /// <summary>
+        /// temp
+        /// </summary>
+        public CloudFilesRequest(Uri uri): this( WebRequest.Create(uri) as HttpWebRequest)
+        {
+            
+        }
         /// <summary>
         /// Constructor without proxy credentials provided
         /// </summary>
         /// <param name="request">The request being sent to the server</param>
-        public CloudFilesRequest(IRequest request) : this(request, null)
+        public CloudFilesRequest(HttpWebRequest request) : this(request, null)
         {
         }
 
@@ -34,11 +43,11 @@ namespace com.mosso.cloudfiles.domain.request
         /// <param name="request">The request being sent to the server</param>
         /// <param name="proxyCredentials">Proxy credentials</param>
         /// <exception cref="System.ArgumentNullException">Thrown when any of the reference arguments are null</exception>
-        public CloudFilesRequest(IRequest request, ProxyCredentials proxyCredentials)
+        public CloudFilesRequest(HttpWebRequest request, ProxyCredentials proxyCredentials)
         {
             if (request == null) throw new ArgumentNullException();
 
-            this.request = request;
+            this._httpWebRequest = request;
             this.proxyCredentials = proxyCredentials;
         }
         
@@ -48,7 +57,7 @@ namespace com.mosso.cloudfiles.domain.request
         /// <returns>the type of the request</returns>
         public Type RequestType
         {
-            get { return request.GetType(); }
+            get { return _httpWebRequest.GetType(); }
         }
 
         /// <summary>
@@ -58,53 +67,103 @@ namespace com.mosso.cloudfiles.domain.request
         
         public ICloudFilesResponse GetResponse()
         {
-            var httpWebRequest = (HttpWebRequest)System.Net.WebRequest.Create(request.Uri);
-            if (request.Headers != null) httpWebRequest.Headers.Add(request.Headers);
+            
+    
 
-            httpWebRequest.Method = request.Method;
-            httpWebRequest.Timeout = Constants.CONNECTION_TIMEOUT;
-            httpWebRequest.UserAgent = Constants.USER_AGENT;
+          
+            _httpWebRequest.Timeout = Constants.CONNECTION_TIMEOUT;
+            _httpWebRequest.UserAgent = Constants.USER_AGENT;
 
-            HandleIsModifiedSinceHeaderRequestFieldFor(httpWebRequest);
-            HandleRangeHeader(httpWebRequest);
-            HandleRequestBodyFor(httpWebRequest);
-            HandleProxyCredentialsFor(httpWebRequest);
-            return new CloudFilesResponse((HttpWebResponse)httpWebRequest.GetResponse());
+         //   HandleIsModifiedSinceHeaderRequestFieldFor(_httpWebRequest);
+            HandleRangeHeader(_httpWebRequest);
+            HandleRequestBodyFor(_httpWebRequest);
+            HandleProxyCredentialsFor(_httpWebRequest);
+            return new CloudFilesResponse((HttpWebResponse)_httpWebRequest.GetResponse());
 
         }
 
-        public string RequestUri
+        
+        public Uri RequestUri
         {
-            get { throw new AbandonedMutexException(); }
+            get { return this._httpWebRequest.RequestUri; }
         }
+
+        
 
         public string Method
         {
-            get { throw new NotImplementedException(); }
+            get { return this._httpWebRequest.Method; }
+            set { this._httpWebRequest.Method = value; }
         }
 
         public WebHeaderCollection Headers
         {
+            get
+            {
+
+
+
+                return _httpWebRequest.Headers;
+
+            }
+        }
+
+        public long ContentLength
+        {
+            get { return _httpWebRequest.ContentLength; }
+            set { _httpWebRequest.ContentLength = value; }
+        }
+
+        public int RangeTo
+        {
+            set; get;
+        }
+
+        public int RangeFrom
+        {
+            set; get;
+        }
+
+        public string ContentType
+        {
+            get { return _httpWebRequest.ContentType; }
+            set { _httpWebRequest.ContentType = value; }
+        }
+
+        public DateTime IfModifiedSince
+        {
+            get { return _httpWebRequest.IfModifiedSince; }
+            set { _httpWebRequest.IfModifiedSince = value; }
+        }
+
+        public string ETag
+        {
             get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        public string UserAgent
+        {
+            get { return _httpWebRequest.UserAgent; }
+            set { _httpWebRequest.UserAgent = value; }
         }
 
         private void HandleRangeHeader(HttpWebRequest webrequest)
         {
-            if (!(request is IRangedRequest)) return;
-            var rangedRequest = (IRangedRequest) request;
-            if (rangedRequest.RangeFrom != 0 && rangedRequest.RangeTo == 0)
-                webrequest.AddRange("bytes", rangedRequest.RangeFrom);
-            else if (rangedRequest.RangeFrom == 0 && rangedRequest.RangeTo != 0)
-                webrequest.AddRange("bytes", rangedRequest.RangeTo);
-            else if (rangedRequest.RangeFrom != 0 && rangedRequest.RangeTo != 0)
-                webrequest.AddRange("bytes", rangedRequest.RangeFrom, rangedRequest.RangeTo);
+            
+            if (this.RangeFrom != 0 && this.RangeTo == 0)
+                webrequest.AddRange("bytes", this.RangeFrom);
+            else if (this.RangeFrom == 0 && this.RangeTo != 0)
+                webrequest.AddRange("bytes", this.RangeTo);
+            else if (this.RangeFrom != 0 && this.RangeTo != 0)
+                webrequest.AddRange("bytes", this.RangeFrom, this.RangeTo);
         }
 
-        private void HandleIsModifiedSinceHeaderRequestFieldFor(HttpWebRequest webrequest)
-        {
-            if (!(request is IModifiedSinceRequest)) return;
-            webrequest.IfModifiedSince = ((IModifiedSinceRequest)request).ModifiedSince;
-        }
+       // private void HandleIsModifiedSinceHeaderRequestFieldFor(HttpWebRequest webrequest)
+     //   {
+   //         if (!(_httpWebRequest is IModifiedSinceRequest)) return;
+    //      //  webrequest.IfModifiedSince = ((IModifiedSinceRequest)request).ModifiedSince; //commented by ryan
+    //    }
 
         private void HandleProxyCredentialsFor(HttpWebRequest httpWebRequest)
         {
@@ -119,20 +178,20 @@ namespace com.mosso.cloudfiles.domain.request
 
         private void HandleRequestBodyFor(HttpWebRequest httpWebRequest)
         {
-            if (!(request is IRequestWithContentBody)) return;
+            //   if (!(request is IRequestWithContentBody)) return; //commented by ryan
 
-            var requestWithContentBody = (IRequestWithContentBody) request;
-            httpWebRequest.ContentLength = requestWithContentBody.ContentLength;
+            //    var requestWithContentBody = (IRequestWithContentBody) request;  //commented by ryan
+            //    httpWebRequest.ContentLength = requestWithContentBody.ContentLength; //commented by ryan
             httpWebRequest.AllowWriteStreamBuffering = false;
             if(httpWebRequest.ContentLength < 1)
                 httpWebRequest.SendChunked = true;
 
-            var requestMimeType = request.ContentType;
+            var requestMimeType = _httpWebRequest.ContentType;
             httpWebRequest.ContentType = String.IsNullOrEmpty(requestMimeType) 
                 ? "application/octet-stream" : requestMimeType;
 
             var stream = httpWebRequest.GetRequestStream();
-            requestWithContentBody.ReadFileIntoRequest(stream);
+            //    requestWithContentBody.ReadFileIntoRequest(stream); //commented by ryan
         }
 
         

@@ -1,5 +1,8 @@
 using System;
+using System.Net;
 using com.mosso.cloudfiles.domain.request;
+using com.mosso.cloudfiles.domain.request.Interfaces;
+using Moq;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
 
@@ -12,7 +15,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetAccountInformationSe
         [ExpectedException(typeof(ArgumentNullException))]
         public void should_throw_argument_null_exception()
         {
-            new GetAccountInformationSerialized(null, "authtoken", Format.JSON);
+            new GetAccountInformationSerialized(null, Format.JSON);
         }
     }
 
@@ -23,60 +26,39 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetAccountInformationSe
         [ExpectedException(typeof(ArgumentNullException))]
         public void should_throw_argument_null_exception()
         {
-            new GetAccountInformationSerialized("", "authtoken", Format.JSON);
+            new GetAccountInformationSerialized("", Format.JSON);
         }
     }
 
-    [TestFixture]
-    public class when_getting_account_information_in_json_format_and_auth_token_is_null
-    {
-        [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void should_throw_argument_null_exception()
-        {
-            new GetAccountInformationSerialized("http://storageurl", null, Format.JSON);
-        }
-    }
-
-    [TestFixture]
-    public class when_getting_account_information_in_json_format_and_auth_token_is_emptry_string
-    {
-        [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void should_throw_argument_null_exception()
-        {
-            new GetAccountInformationSerialized("http://storageurl", "", Format.JSON);
-        }
-    }
 
     [TestFixture]
     public class when_getting_account_information_in_json_format
     {
         private GetAccountInformationSerialized getAccountInformationSerialized;
+        private Mock<ICloudFilesRequest> _mockrequest;
 
         [SetUp]
         public void setup()
         {
-            getAccountInformationSerialized = new GetAccountInformationSerialized("http://storageurl", "authtoken", Format.JSON);
+            getAccountInformationSerialized = new GetAccountInformationSerialized("http://storageurl", Format.JSON);
+            _mockrequest = new Mock<ICloudFilesRequest>();
         }
 
         [Test]
         public void should_have_properly_formmated_request_url()
         {
-            Assert.That(getAccountInformationSerialized.Uri.ToString(), Is.EqualTo("http://storageurl/?format=json"));
+            Assert.That(getAccountInformationSerialized.CreateUri().ToString(), Is.EqualTo("http://storageurl/?format=json"));
         }
 
         [Test]
         public void should_have_a_http_get_method()
         {
-            Assert.That(getAccountInformationSerialized.Method, Is.EqualTo("GET"));
+            getAccountInformationSerialized.Apply(_mockrequest.Object);
+            _mockrequest.VerifySet(x => x.Method = "GET");
+           
         }
 
-        [Test]
-        public void should_have_a_auth_token_in_the_headers()
-        {
-            Assert.That(getAccountInformationSerialized.Headers[utils.Constants.X_AUTH_TOKEN], Is.EqualTo("authtoken"));
-        }
+      
     }
 
     [TestFixture]
@@ -86,7 +68,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetAccountInformationSe
         [ExpectedException(typeof(ArgumentNullException))]
         public void should_throw_argument_null_exception()
         {
-            new GetAccountInformationSerialized(null, "authtoken", Format.XML);
+            new GetAccountInformationSerialized(null, Format.XML);
         }
     }
 
@@ -97,59 +79,37 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetAccountInformationSe
         [ExpectedException(typeof(ArgumentNullException))]
         public void should_throw_argument_null_exception()
         {
-            new GetAccountInformationSerialized("", "authtoken", Format.XML);
+            new GetAccountInformationSerialized("", Format.XML);
         }
     }
 
-    [TestFixture]
-    public class when_getting_account_information_in_xml_format_and_auth_token_is_null
-    {
-        [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void should_throw_argument_null_exception()
-        {
-            new GetAccountInformationSerialized("http://storageurl", null, Format.XML);
-        }
-    }
-
-    [TestFixture]
-    public class when_getting_account_information_in_xml_format_and_auth_token_is_emptry_string
-    {
-        [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void should_throw_argument_null_exception()
-        {
-            new GetAccountInformationSerialized("http://storageurl", "", Format.XML);
-        }
-    }
 
     [TestFixture]
     public class when_getting_account_information_in_xml_format
     {
         private GetAccountInformationSerialized getAccountInformationSerialized;
+        private Mock<ICloudFilesRequest> _mockrequest;
 
         [SetUp]
         public void setup()
         {
-            getAccountInformationSerialized = new GetAccountInformationSerialized("http://storageurl", "authtoken", Format.XML);
+            getAccountInformationSerialized = new GetAccountInformationSerialized("http://storageurl", Format.XML);
+            _mockrequest = new Mock<ICloudFilesRequest>();
         }
 
         [Test]
         public void should_have_properly_formmated_request_url()
         {
-            Assert.That(getAccountInformationSerialized.Uri.ToString(), Is.EqualTo("http://storageurl/?format=xml"));
+            Assert.That(getAccountInformationSerialized.CreateUri().ToString(), Is.EqualTo("http://storageurl/?format=xml"));
         }
 
         [Test]
         public void should_have_a_http_get_method()
         {
-            Assert.That(getAccountInformationSerialized.Method, Is.EqualTo("GET"));
+            getAccountInformationSerialized.Apply(_mockrequest.Object);
+            _mockrequest.VerifySet(x => x.Method = "GET");
         }
 
-        [Test]
-        public void should_have_a_auth_token_in_the_headers()
-        {
-            Assert.That(getAccountInformationSerialized.Headers[utils.Constants.X_AUTH_TOKEN], Is.EqualTo("authtoken"));
-        }
+        
     }
 }

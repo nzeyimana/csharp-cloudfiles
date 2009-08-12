@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using com.mosso.cloudfiles.domain.request.Interfaces;
 using com.mosso.cloudfiles.exceptions;
 using com.mosso.cloudfiles.utils;
 
@@ -13,27 +14,33 @@ namespace com.mosso.cloudfiles.domain.request
     /// <summary>
     /// GetContainerItemList
     /// </summary>
-    public class GetContainerItemList : BaseRequest
+    public class GetContainerItemList : IAddToWebRequest
     {
+        private readonly string _storageUrl;
+        private readonly string _containerName;
+        private readonly StringBuilder _stringBuilder;
+
         /// <summary>
         /// GetContainerItemList constructor
         /// </summary>
         /// <param name="storageUrl">the customer unique url to interact with cloudfiles</param>
         /// <param name="containerName">the name of the container where the storage item is located</param>
         /// <param name="requestParameters">dictionary of parameter filters to place on the request url</param>
-        /// <param name="authToken">the customer unique token obtained after valid authentication necessary for all cloudfiles ReST interaction</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
         /// <exception cref="ContainerNameException">Thrown when the container name is invalid</exception>
-        public GetContainerItemList(string storageUrl, string authToken, string containerName, Dictionary<GetItemListParameters, string> requestParameters)
+        public GetContainerItemList(string storageUrl,  string containerName,
+            Dictionary<GetItemListParameters, string> requestParameters)
         {
+            _storageUrl = storageUrl;
+            _containerName = containerName;
             if (string.IsNullOrEmpty(storageUrl)
-                || string.IsNullOrEmpty(authToken)
+             
                 || string.IsNullOrEmpty(containerName))
                 throw new ArgumentNullException();
 
             if (!ContainerNameValidator.Validate(containerName)) throw new ContainerNameException();
 
-            StringBuilder stringBuilder = new StringBuilder();
+            _stringBuilder = new StringBuilder();
 
             if (requestParameters != null && requestParameters.Count > 0)
             {
@@ -43,16 +50,16 @@ namespace com.mosso.cloudfiles.domain.request
                     if (param == GetItemListParameters.Limit)
                         int.Parse(requestParameters[param]);
 
-                    if (stringBuilder.Length > 0)
-                        stringBuilder.Append("&");
+                    if (_stringBuilder.Length > 0)
+                        _stringBuilder.Append("&");
                     else
-                        stringBuilder.AppendFormat("?");
-                    stringBuilder.Append(paramName + "=" + requestParameters[param].Encode());
+                        _stringBuilder.AppendFormat("?");
+                    _stringBuilder.Append(paramName + "=" + requestParameters[param].Encode());
                 }
             }
-            Uri = new Uri(storageUrl + "/" + containerName.Encode() + stringBuilder);
-            Method = "GET";
-            AddAuthTokenToHeaders(authToken);
+            
+          
+           
         }
 
         /// <summary>
@@ -60,10 +67,19 @@ namespace com.mosso.cloudfiles.domain.request
         /// </summary>
         /// <param name="storageUrl">the customer unique url to interact with cloudfiles</param>
         /// <param name="containerName">the name of the container where the storage item is located</param>
-        /// <param name="authToken">the customer unique token obtained after valid authentication necessary for all cloudfiles ReST interaction</param>
-        public GetContainerItemList(string storageUrl, string authToken, string containerName)
-            : this(storageUrl, authToken, containerName, null)
+        public GetContainerItemList(string storageUrl, string containerName)
+            : this(storageUrl, containerName, null)
         {
+        }
+
+        public Uri CreateUri()
+        {
+           return  new Uri(_storageUrl + "/" + _containerName.Encode() + _stringBuilder);
+        }
+
+        public void Apply(ICloudFilesRequest request)
+        {
+            request.Method = "GET";
         }
     }
 }

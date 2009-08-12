@@ -12,7 +12,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetContainerInformation
         [ExpectedException(typeof(ArgumentNullException))]
         public void should_throw_argument_null_exception()
         {
-            new GetContainerInformation(null, "authtoken", "containername");
+            new GetContainerInformation(null, "containername");
         }
     }
 
@@ -23,31 +23,11 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetContainerInformation
         [ExpectedException(typeof(ArgumentNullException))]
         public void should_throw_argument_null_exception()
         {
-            new GetContainerInformation("", "authtoken", "containername");
+            new GetContainerInformation("", "containername");
         }
     }
 
-    [TestFixture]
-    public class when_getting_container_information_and_auth_token_is_null
-    {
-        [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void should_throw_argument_null_exception()
-        {
-            new GetContainerInformation("http://storageurl", null, "containername");
-        }
-    }
 
-    [TestFixture]
-    public class when_getting_container_information_and_auth_token_is_emptry_string
-    {
-        [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void should_throw_argument_null_exception()
-        {
-            new GetContainerInformation("http://storageurl", "", "containername");
-        }
-    }
 
     [TestFixture]
     public class when_getting_container_information_and_container_name_is_null
@@ -56,7 +36,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetContainerInformation
         [ExpectedException(typeof(ArgumentNullException))]
         public void should_throw_argument_null_exception()
         {
-            new GetContainerInformation("http://storageurl", "authtoken", null);
+            new GetContainerInformation("http://storageurl", null);
         }
     }
 
@@ -67,7 +47,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetContainerInformation
         [ExpectedException(typeof(ArgumentNullException))]
         public void should_throw_argument_null_exception()
         {
-            new GetContainerInformation("http://storageurl", "authtoken", "");
+            new GetContainerInformation("http://storageurl", "");
         }
     }
 
@@ -79,25 +59,22 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetContainerInformation
         [SetUp]
         public void setup()
         {
-            getContainerInformation = new GetContainerInformation("http://storageurl", "authtoken", "containername");
+            getContainerInformation = new GetContainerInformation("http://storageurl", "containername");
         }
 
         [Test]
         public void should_have_properly_formmated_request_url()
         {
-            Assert.That(getContainerInformation.Uri.ToString(), Is.EqualTo("http://storageurl/containername"));
+            Assert.That(getContainerInformation.CreateUri().ToString(), Is.EqualTo("http://storageurl/containername"));
         }
 
         [Test]
         public void should_have_a_http_head_method()
         {
-            Assert.That(getContainerInformation.Method, Is.EqualTo("HEAD"));
+            Asserts.AssertMethod(getContainerInformation, "HEAD");
+           
         }
 
-        [Test]
-        public void should_have_a_auth_token_in_the_headers()
-        {
-            Assert.That(getContainerInformation.Headers[utils.Constants.X_AUTH_TOKEN], Is.EqualTo("authtoken"));
-        }
+      
     }
 }

@@ -3,33 +3,48 @@
 ///
 
 using System;
+using com.mosso.cloudfiles.domain.request.Interfaces;
 using com.mosso.cloudfiles.utils;
 
 namespace com.mosso.cloudfiles.domain.request
 {
-    public class SetPublicContainerDetails : BaseRequest
+    public class SetPublicContainerDetails : IAddToWebRequest
     {
+        private readonly string _cdnManagementUrl;
+        private readonly string _containerName;
+        private readonly bool _isCdnEnabled;
+        private readonly int _timeToLiveInSeconds;
+
         /// <summary>
         /// Assigns various details to containers already publicly available on the CDN
         /// </summary>
         /// <param name="cdnManagementUrl">The CDN URL</param>
-        /// <param name="authToken">The authorization token returned from the authorization server</param>
         /// <param name="containerName">The name of the container to update the details for</param>
         /// <param name="isCdnEnabled">Sets whether or not specified container is available on the CDN</param>
-        public SetPublicContainerDetails(string cdnManagementUrl, string authToken, string containerName, bool isCdnEnabled, int timeToLiveInSeconds)
+        /// <param name="timeToLiveInSeconds"></param>
+        public SetPublicContainerDetails(string cdnManagementUrl, string containerName, bool isCdnEnabled, int timeToLiveInSeconds)
         {
+  
             if (String.IsNullOrEmpty(cdnManagementUrl) ||
-                    String.IsNullOrEmpty(authToken) ||
-                    String.IsNullOrEmpty(containerName))
-                throw new ArgumentNullException();
+                String.IsNullOrEmpty(containerName))
+                throw new ArgumentNullException();        
+            _cdnManagementUrl = cdnManagementUrl;
+            _containerName = containerName;
+            _isCdnEnabled = isCdnEnabled;
+            _timeToLiveInSeconds = timeToLiveInSeconds;
+        }
 
-            Method = "POST";
+        public Uri CreateUri()
+        {
+            return  new Uri(_cdnManagementUrl + "/" + _containerName.Encode());
+        }
 
-            Uri = new Uri(cdnManagementUrl + "/" + containerName.Encode());
-
-            AddAuthTokenToHeaders(authToken);
-            Headers.Add(Constants.X_CDN_ENABLED, isCdnEnabled.Capitalize());
-            if(timeToLiveInSeconds > -1) Headers.Add(Constants.X_CDN_TTL, timeToLiveInSeconds.ToString());
+        public void Apply(ICloudFilesRequest request)
+        {
+            request.Method = "POST";
+              request.Headers.Add(Constants.X_CDN_ENABLED, _isCdnEnabled.Capitalize());
+            if(_timeToLiveInSeconds > -1) request.Headers.Add(Constants.X_CDN_TTL, _timeToLiveInSeconds.ToString());
+        
         }
     }
 }

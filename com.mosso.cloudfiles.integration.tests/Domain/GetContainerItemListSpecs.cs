@@ -5,6 +5,7 @@ using com.mosso.cloudfiles.domain;
 using com.mosso.cloudfiles.domain.request;
 using com.mosso.cloudfiles.domain.response;
 using com.mosso.cloudfiles.exceptions;
+using Moq;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
 
@@ -13,18 +14,25 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
     [TestFixture]
     public class When_retrieving_a_list_items_from_specific_container : TestBase
     {
+        private IRequestFactory GetMockRequestFactory(string useragent,Uri uri)
+        {
+            var handrequest = new CloudFilesRequest((HttpWebRequest)WebRequest.Create(uri)) {UserAgent = useragent};
+            var mock = new Mock<IRequestFactory>();
+            mock.Setup(x => x.Create(uri)).Returns(handrequest);
+            IRequestFactory factory = mock.Object;
+            return factory;
+        }
         [Test]
         public void should_return_no_content_status_when_container_is_empty()
         {
             using (new TestHelper(authToken, storageUrl))
             {
-                var getContainerItemsRequest = new GetContainerItemList(storageUrl, authToken, Constants.CONTAINER_NAME);
-                getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
+                var getContainerItemsRequest = new GetContainerItemList(storageUrl, Constants.CONTAINER_NAME);
+
+                //getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
 
 
-                var response =
-                    new ResponseFactoryWithContentBody().Create(
-                        new CloudFilesRequest(getContainerItemsRequest));
+                var response = new GenerateRequestByType().Submit(getContainerItemsRequest, authToken);
                 response.Dispose();
                 Assert.That(response.Status, Is.EqualTo(HttpStatusCode.NoContent));
             }
@@ -37,12 +45,10 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
             {
                 testHelper.PutItemInContainer(Constants.StorageItemName, Constants.StorageItemName);
 
-                var getContainerItemsRequest = new GetContainerItemList(storageUrl, authToken, Constants.CONTAINER_NAME);
-                getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
+                var getContainerItemsRequest = new GetContainerItemList(storageUrl,  Constants.CONTAINER_NAME);
+                //getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
 
-                var response =
-                    new ResponseFactoryWithContentBody().Create(
-                        new CloudFilesRequest(getContainerItemsRequest));
+                var response = new GenerateRequestByType().Submit(getContainerItemsRequest, authToken);
                 testHelper.DeleteItemFromContainer(Constants.StorageItemName);
 
                 Assert.That(response.Status, Is.EqualTo(HttpStatusCode.OK));
@@ -55,13 +61,12 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
         public void should_return_401_when_the_account_name_is_wrong()
         {
             Uri uri = new Uri("http://henhouse-1.stg.racklabs.com/v1/Persistent");
-            GetContainerItemList getContainerItemsRequest = new GetContainerItemList(uri.ToString(), authToken, "#%");
-            getContainerItemsRequest.UserAgent = "NASTTestUserAgent";
+            GetContainerItemList getContainerItemsRequest = new GetContainerItemList(uri.ToString(), "#%");
+            
             try
             {
-                var response =
-                    new ResponseFactoryWithContentBody().Create(
-                        new CloudFilesRequest(getContainerItemsRequest));
+                var factory = GetMockRequestFactory("NASTTestUserAgent", uri);
+                var response = new GenerateRequestByType(factory).Submit(getContainerItemsRequest, authToken);
                 response.Dispose();
             }
             catch (Exception ex)
@@ -75,29 +80,23 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
         public void Should_throw_an_exception_when_the_container_name_exceeds_the_maximum_number_of_characters_allowed()
         {
             Uri uri = new Uri("http://henhouse-1.stg.racklabs.com/v1/Persistent");
-            new GetContainerItemList(uri.ToString(), authToken, new string('a', Constants.MaximumContainerNameLength + 1));
+            new GetContainerItemList(uri.ToString(),  new string('a', Constants.MaximumContainerNameLength + 1));
         }
 
         [Test]
         [ExpectedException(typeof (ArgumentNullException))]
         public void Should_throw_an_exception_when_the_storage_url_is_null()
         {
-            new GetContainerItemList(null, "a", "a");
+            new GetContainerItemList(null, "a");
         }
 
         [Test]
         [ExpectedException(typeof (ArgumentNullException))]
         public void Should_throw_an_exception_when_the_container_name_is_null()
         {
-            new GetContainerItemList("a", "a", null);
+            new GetContainerItemList("a",  null);
         }
 
-        [Test]
-        [ExpectedException(typeof (ArgumentNullException))]
-        public void Should_throw_an_exception_when_the_auth_token_is_null()
-        {
-            new GetContainerItemList("a", null, "a");
-        }
 
         [Test]
         public void Should_return_ten_objects_when_setting_the_limit_to_ten()
@@ -110,13 +109,10 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
                 var parameters = new Dictionary<GetItemListParameters, string>
                                                                            {{GetItemListParameters.Limit, "10"}};
 
-                var getContainerItemsRequest = new GetContainerItemList(storageUrl,
-                                                                                         authToken, Constants.CONTAINER_NAME, parameters);
-                getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
+                var getContainerItemsRequest = new GetContainerItemList(storageUrl, Constants.CONTAINER_NAME, parameters);
 
-                var response =
-                    new ResponseFactoryWithContentBody().Create(
-                        new CloudFilesRequest(getContainerItemsRequest));
+
+                var response = new GenerateRequestByType().Submit(getContainerItemsRequest, authToken);
 
                 for (int i = 0; i < 12; ++i)
                     testHelper.DeleteItemFromContainer(i.ToString());
@@ -147,12 +143,11 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
                 var parameters = new Dictionary<GetItemListParameters, string> { { GetItemListParameters.Path, "topdir1" } };
 
                 var getContainerItemsRequest = new GetContainerItemList(storageUrl,
-                                                                                         authToken, Constants.CONTAINER_NAME, parameters);
-                getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
+                                                                                        Constants.CONTAINER_NAME, parameters);
+               // getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
 
-                var response =
-                    new ResponseFactoryWithContentBody().Create(
-                        new CloudFilesRequest(getContainerItemsRequest));
+                var response = new GenerateRequestByType().Submit(getContainerItemsRequest, authToken);
+                  
 
                 for (int i = 0; i < 12; ++i)
                 {
@@ -196,13 +191,10 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
 
                 var parameters = new Dictionary<GetItemListParameters, string> { { GetItemListParameters.Path, "topdir1/subdir2" } };
 
-                var getContainerItemsRequest = new GetContainerItemList(storageUrl,
-                                                                                         authToken, Constants.CONTAINER_NAME, parameters);
-                getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
+                var getContainerItemsRequest = new GetContainerItemList(storageUrl, Constants.CONTAINER_NAME, parameters);
+             //   getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
 
-                var response =
-                    new ResponseFactoryWithContentBody().Create(
-                        new CloudFilesRequest(getContainerItemsRequest));
+                var response = new GenerateRequestByType().Submit(getContainerItemsRequest, authToken);
 
                 for (int i = 0; i < 12; ++i)
                 {
@@ -235,13 +227,10 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
                 var parameters = new Dictionary<GetItemListParameters, string>
                                                                            {{GetItemListParameters.Prefix, "2"}};
 
-                var getContainerItemsRequest = new GetContainerItemList(storageUrl,
-                                                                                         authToken, Constants.CONTAINER_NAME, parameters);
-                getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
+                var getContainerItemsRequest = new GetContainerItemList(storageUrl, Constants.CONTAINER_NAME, parameters);
+             //   getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
 
-                var response =
-                    new ResponseFactoryWithContentBody().Create(
-                        new CloudFilesRequest(getContainerItemsRequest));
+                var response = new GenerateRequestByType().Submit(getContainerItemsRequest, authToken);
 
                 for (int i = 0; i < 12; ++i)
                     testHelper.DeleteItemFromContainer(i.ToString());
@@ -265,12 +254,10 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
 
                 var parameters = new Dictionary<GetItemListParameters, string>{{GetItemListParameters.Marker, "5"}};
 
-                var getContainerItemsRequest = new GetContainerItemList(storageUrl, authToken, Constants.CONTAINER_NAME, parameters);
-                getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
+                var getContainerItemsRequest = new GetContainerItemList(storageUrl, Constants.CONTAINER_NAME, parameters);
+              //  getContainerItemsRequest.UserAgent = Constants.USER_AGENT;
 
-                var response =
-                    new ResponseFactoryWithContentBody().Create(
-                        new CloudFilesRequest(getContainerItemsRequest));
+                var response = new GenerateRequestByType().Submit(getContainerItemsRequest, authToken);
 
                 for (int i = 0; i < 12; ++i)
                     testHelper.DeleteItemFromContainer(i.ToString());
@@ -296,7 +283,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
                     Dictionary<GetItemListParameters, string> parameters =
                         new Dictionary<GetItemListParameters, string> {{(GetItemListParameters) int.MaxValue, "2"}};
 
-                    new GetContainerItemList(storageUrl,authToken, Constants.CONTAINER_NAME, parameters);
+                    new GetContainerItemList(storageUrl, Constants.CONTAINER_NAME, parameters);
                 }
                 catch (NotImplementedException ne)
                 {
@@ -317,12 +304,9 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
         [Test]
         public void should_not_throw_an_exception_when_the_container_name_starts_with_pound()
         {
-            var getContainerItemList = new GetContainerItemList(storageUrl, authToken, "#container");
+            var getContainerItemList = new GetContainerItemList(storageUrl, "#container");
 
-            var response =
-                new ResponseFactoryWithContentBody().Create(
-                    new CloudFilesRequest((getContainerItemList)));
-
+            var response = new GenerateRequestByType().Submit(getContainerItemList, authToken);
             response.Dispose();
             Assert.That(true);
         }
@@ -331,11 +315,9 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
         public void should_not_throw_an_exception_when_the_container_contains_utf8_characters()
         {
             var containerName = '\u07FF' + "container";
-            var getContainerItemList = new GetContainerItemList(storageUrl, authToken, containerName);
+            var getContainerItemList = new GetContainerItemList(storageUrl,  containerName);
 
-            var response =
-                new ResponseFactoryWithContentBody().Create(
-                    new CloudFilesRequest((getContainerItemList)));
+            var response = new GenerateRequestByType().Submit(getContainerItemList, authToken);
 
             response.Dispose();
             foreach (string s in response.ContentBody)
@@ -348,11 +330,9 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
         {
 
             var containerName = '\uD8CC' + "container";
-            var getContainerItemList = new GetContainerItemList(storageUrl, authToken, containerName);
+            var getContainerItemList = new GetContainerItemList(storageUrl,  containerName);
 
-            var response =
-                new ResponseFactoryWithContentBody().Create(
-                    new CloudFilesRequest((getContainerItemList)));
+            var response = new GenerateRequestByType().Submit(getContainerItemList, authToken);
 
             foreach (string s in response.ContentBody)
                 Console.WriteLine(s);
@@ -365,11 +345,9 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
         {
 
             var containerName = '\uDCFF' + "container";
-            var getContainerItemList = new GetContainerItemList(storageUrl, authToken, containerName);
+            var getContainerItemList = new GetContainerItemList(storageUrl,  containerName);
 
-            var response =
-                new ResponseFactoryWithContentBody().Create(
-                    new CloudFilesRequest((getContainerItemList)));
+            var response = new GenerateRequestByType().Submit(getContainerItemList, authToken);
 
             response.Dispose();
             foreach (string s in response.ContentBody)

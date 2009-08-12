@@ -73,7 +73,7 @@ namespace com.mosso.cloudfiles
         /// <summary>
         /// the public cdn url for the authenticated user
         /// </summary>
-        public string CdnManagementUrl { get; protected set; }
+        protected string CdnManagementUrl { get; set; }
 
         /// <summary>
         /// the session based token used to ensure the user was authenticated
@@ -83,7 +83,7 @@ namespace com.mosso.cloudfiles
         /// <summary>
         /// The user credentials used to authenticate against cloud files
         /// </summary>
-        public UserCredentials UserCredentials { get; protected set; }
+        protected UserCredentials UserCredentials { get; set; }
 
         /// <summary>
         /// Adds logging for access to your public containers.

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Mime;
 using com.mosso.cloudfiles.domain.response.Interfaces;
 using com.mosso.cloudfiles.utils;
 
@@ -17,7 +18,7 @@ namespace com.mosso.cloudfiles.domain.response
     public class CloudFilesResponse : ICloudFilesResponse
     {
         private readonly HttpWebResponse _webResponse;
-
+        private IList<string> _contentbody = new List<string>();
         public CloudFilesResponse(HttpWebResponse webResponse)
         {
             _webResponse = webResponse;
@@ -71,9 +72,33 @@ namespace com.mosso.cloudfiles.domain.response
             get { return _webResponse.StatusDescription; }
         }
 
+        public IList<string> ContentBody
+        {
+            get
+            {
+                return _contentbody;
+            }
+        }
+
+        public string ContentType
+        {
+            get { return _webResponse.ContentType; }
+        }
+
+        public string ETag
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
         public Stream GetResponseStream()
         {
             return _webResponse.GetResponseStream();
+        }
+
+        public void Dispose()
+        {
+            _webResponse.Close();
         }
     }
 }

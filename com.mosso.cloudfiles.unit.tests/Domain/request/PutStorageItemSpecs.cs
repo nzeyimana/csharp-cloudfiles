@@ -12,7 +12,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.PutStorageItemSpecs
         [ExpectedException(typeof(FileNotFoundException))]
         public void should_throw_file_not_found_exception()
         {
-            new PutStorageItem("a", "a", "a", "a", "a");
+            new PutStorageItem("a", "a", "a", "a");
         }
 
     }
@@ -24,7 +24,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.PutStorageItemSpecs
         [ExpectedException(typeof(ContainerNameException))]
         public void should_throw_container_name_exception()
         {
-            new PutStorageItem("a", "a", new string('a', Constants.MAX_CONTAINER_NAME_LENGTH + 1), "a", "a");
+            new PutStorageItem("a", new string('a', Constants.MAX_CONTAINER_NAME_LENGTH + 1), "a", "a");
         }
 
     }
@@ -37,7 +37,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.PutStorageItemSpecs
         public void should_throw_container_name_exception()
         {
             var s = new MemoryStream(new byte[0]);
-            new PutStorageItem("a", "a", new string('a', Constants.MAX_CONTAINER_NAME_LENGTH + 1), "a", s);
+            new PutStorageItem("a", new string('a', Constants.MAX_CONTAINER_NAME_LENGTH + 1), "a", s);
         }
     }
 
@@ -48,7 +48,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.PutStorageItemSpecs
         [ExpectedException(typeof(StorageItemNameException))]
         public void should_throw_container_name_exception()
         {
-            new PutStorageItem("a", "a", "a", new string('a', Constants.MAX_OBJECT_NAME_LENGTH + 1), "a");
+            new PutStorageItem("a", "a", new string('a', Constants.MAX_OBJECT_NAME_LENGTH + 1), "a");
         }
 
     }
@@ -61,7 +61,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.PutStorageItemSpecs
         public void should_throw_container_name_exception()
         {
             var s = new MemoryStream(new byte[0]);
-            new PutStorageItem("a", "a", "a", new string('a', Constants.MAX_OBJECT_NAME_LENGTH + 1), s);
+            new PutStorageItem("a", "a", new string('a', Constants.MAX_OBJECT_NAME_LENGTH + 1), s);
         }
     }
 

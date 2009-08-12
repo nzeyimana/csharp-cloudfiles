@@ -3,6 +3,7 @@ using System.Net;
 using com.mosso.cloudfiles.domain;
 using com.mosso.cloudfiles.domain.request;
 using com.mosso.cloudfiles.domain.response;
+using com.mosso.cloudfiles.domain.response.Interfaces;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
 
@@ -18,13 +19,13 @@ namespace com.mosso.cloudfiles.integration.tests.domain.RetrieveContainerRequest
             
             using(new TestHelper(authToken, storageUrl))
             {
-                IResponseWithContentBody response = null;
+                ICloudFilesResponse response = null;
                 try
                 {
-                    GetContainers request = new GetContainers(storageUrl, authToken);
-                    request.UserAgent = "NASTTestUserAgent";
+                    GetContainers request = new GetContainers(storageUrl);
+ 
 
-                    response = new ResponseFactoryWithContentBody().Create(new CloudFilesRequest(request));
+                    response = new GenerateRequestByType(new RequestFactoryWithAgentSupport("NASTTestUserAgent")).Submit(request, authToken);
 
                     Assert.That(response.Status, Is.EqualTo(HttpStatusCode.OK));
                     Assert.That(response.ContentBody, Is.Not.Null);
@@ -45,11 +46,11 @@ namespace com.mosso.cloudfiles.integration.tests.domain.RetrieveContainerRequest
             
             using (new TestHelper(authToken, storageUrl))
             {
-                IResponseWithContentBody response = null;
+                ICloudFilesResponse response = null;
                 try
                 {
-                    GetContainers request = new GetContainers(storageUrl, authToken);
-                    response = new ResponseFactoryWithContentBody().Create(new CloudFilesRequest(request));
+                    GetContainers request = new GetContainers(storageUrl);
+                    response = new GenerateRequestByType().Submit(request, authToken);
                     Assert.That(response.ContentBody.Count, Is.GreaterThan(0));
 
                 }
@@ -66,15 +67,10 @@ namespace com.mosso.cloudfiles.integration.tests.domain.RetrieveContainerRequest
         [ExpectedException(typeof (ArgumentNullException))]
         public void Should_throw_an_exception_when_the_storage_url_is_null()
         {
-            new GetContainers(null, "a");
+            new GetContainers(null);
         }
 
-        [Test]
-        [ExpectedException(typeof (ArgumentNullException))]
-        public void Should_throw_an_exception_when_the_auth_token_is_null()
-        {
-            new GetContainers("a", null);
-        }
+       
     }
 
     [TestFixture]
@@ -84,10 +80,9 @@ namespace com.mosso.cloudfiles.integration.tests.domain.RetrieveContainerRequest
         public void Should_return_No_Content_status()
         {
             //Assert.Ignore("Is returning OK instead of NoContent, need to investigate - 2/3/2009");
-            GetContainers request = new GetContainers(storageUrl, authToken);
-            request.UserAgent = "NASTTestUserAgent";
-
-            var response = new ResponseFactoryWithContentBody().Create(new CloudFilesRequest(request));
+            GetContainers request = new GetContainers(storageUrl);
+      
+            var response = new GenerateRequestByType(new RequestFactoryWithAgentSupport("NASTTestUserAgent")).Submit(request, authToken);
 
             Assert.That(response.Status, Is.EqualTo(HttpStatusCode.NoContent));
             if(response.ContentBody != null)

@@ -23,8 +23,9 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetStorageItemInformatio
                     testHelper.PutItemInContainer(Constants.HeadStorageItemName);
                     testHelper.AddMetadataToItem(Constants.HeadStorageItemName);
 
-                    var getStorageItemInformation = new GetStorageItemInformation(storageUrl, authToken, Constants.CONTAINER_NAME, Constants.HeadStorageItemName);
-                    var getStorageItemInformationResponse = new ResponseFactory().Create(new CloudFilesRequest(getStorageItemInformation));
+                    var getStorageItemInformation = new GetStorageItemInformation(storageUrl, Constants.CONTAINER_NAME, Constants.HeadStorageItemName);
+                    var getStorageItemInformationResponse = new GenerateRequestByType().Submit(
+                        getStorageItemInformation, authToken);
                     Assert.That(getStorageItemInformationResponse.Status, Is.EqualTo(HttpStatusCode.NoContent));
 
                     var metadata = getStorageItemInformationResponse.Metadata;
@@ -45,10 +46,10 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetStorageItemInformatio
 
             using (new TestHelper(authToken, storageUrl))
             {
-                var getStorageItemInformation = new GetStorageItemInformation(storageUrl, authToken, Constants.CONTAINER_NAME, Constants.StorageItemName);
+                var getStorageItemInformation = new GetStorageItemInformation(storageUrl, Constants.CONTAINER_NAME, Constants.StorageItemName);
                 try
                 {
-                    new ResponseFactory().Create(new CloudFilesRequest(getStorageItemInformation));
+                    new GenerateRequestByType().Submit(getStorageItemInformation, authToken);
                 }
                 catch (Exception ex)
                 {
@@ -61,35 +62,30 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetStorageItemInformatio
         [ExpectedException(typeof (ContainerNameException))]
         public void Should_throw_an_exception_when_the_length_of_the_container_name_exceeds_the_maximum_allowed_length()
         {
-            new GetStorageItemInformation("a", "a", new string('a', Constants.MaximumContainerNameLength + 1), "a");
+            new GetStorageItemInformation("a", new string('a', Constants.MaximumContainerNameLength + 1), "a");
         }
 
         [Test]
         [ExpectedException(typeof (ArgumentNullException))]
         public void Should_throw_an_exception_when_the_storage_url_is_null()
         {
-            new GetStorageItemInformation(null, "a", "a", "a");
+            new GetStorageItemInformation(null,  "a", "a");
         }
 
         [Test]
         [ExpectedException(typeof (ArgumentNullException))]
         public void Should_throw_an_exception_when_the_container_name_is_null()
         {
-            new GetStorageItemInformation("a", "a", null, "a");
+            new GetStorageItemInformation("a",  null, "a");
         }
 
         [Test]
         [ExpectedException(typeof (ArgumentNullException))]
         public void Should_throw_an_exception_when_the_storage_object_name_is_null()
         {
-            new GetStorageItemInformation("a", "a", "a", null);
+            new GetStorageItemInformation("a",  "a", null);
         }
 
-        [Test]
-        [ExpectedException(typeof (ArgumentNullException))]
-        public void Should_throw_an_exception_when_the_auth_token_is_null()
-        {
-            new GetStorageItemInformation("a", null, "a", "a");
-        }
+      
     }
 }
