@@ -20,11 +20,11 @@ namespace com.mosso.cloudfiles.domain.request
     /// </summary>
     public class PutStorageItem : IAddToWebRequest
     {
-        public Stream Stream { get; set; }
+      //  public Stream Stream { get; set; }
         private readonly string _storageUrl;
         private readonly string _containerName;
         private readonly string _remoteStorageItemName;
-        private Stream stream;
+       private Stream filetosend;
         private readonly Dictionary<string, string> _metadata;
         private string _fileUrl;
        
@@ -61,20 +61,20 @@ namespace com.mosso.cloudfiles.domain.request
         /// <param name="storageUrl">the customer unique url to interact with cloudfiles</param>
         /// <param name="containerName">the name of the container where the storage item is located</param>
         /// <param name="remoteStorageItemName">the name of the storage item to add meta information too</param>
-        /// <param name="stream">the file stream of the file to put into cloudfiles</param>
+        /// <param name="filetosend">the file stream of the file to put into cloudfiles</param>
         /// <param name="metadata">dictionary of meta tags to apply to the storage item</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
         /// <exception cref="ContainerNameException">Thrown when the container name is invalid</exception>
         /// <exception cref="StorageItemNameException">Thrown when the object name is invalid</exception>
         public PutStorageItem(string storageUrl,  string containerName,
             string remoteStorageItemName,
-            Stream stream,
+            Stream filetosend,
             Dictionary<string, string> metadata)
         {
-            Stream = stream;
+           // Stream = filetosend;
             if (string.IsNullOrEmpty(storageUrl)
                 || string.IsNullOrEmpty(containerName)
-                || stream == null
+                || filetosend == null
                 || string.IsNullOrEmpty(remoteStorageItemName))
                 throw new ArgumentNullException();
 
@@ -86,7 +86,7 @@ namespace com.mosso.cloudfiles.domain.request
             _storageUrl = storageUrl;
             _containerName = containerName;
             _remoteStorageItemName = remoteStorageItemName;
-            this.stream = stream;
+            this.filetosend = filetosend;
             _metadata = metadata;
 //         
 //            
@@ -658,7 +658,7 @@ namespace com.mosso.cloudfiles.domain.request
             byte[] buffer = new byte[Constants.CHUNK_SIZE];
 
             var amt = 0;
-            while ((amt = stream.Read(buffer, 0, buffer.Length)) != 0)
+            while ((amt = filetosend.Read(buffer, 0, buffer.Length)) != 0)
             {
                 httpWebRequestFileStream.Write(buffer, 0, amt);
 
@@ -669,7 +669,7 @@ namespace com.mosso.cloudfiles.domain.request
                 }
             }
 
-            stream.Close();
+            filetosend.Close();
             httpWebRequestFileStream.Flush();
             httpWebRequestFileStream.Close();
         }
@@ -683,11 +683,11 @@ namespace com.mosso.cloudfiles.domain.request
         public void Apply(ICloudFilesRequest request)
         {
             request.Method = "PUT";
-            using (FileStream file = new FileStream(_fileUrl, FileMode.Open))
+            using (var file = new FileStream(_fileUrl, FileMode.Open))
             {
                 request.ContentType = this.ContentType();
                 request.ContentLength = file.Length;
-                request.ETag = StringifyMD5(new MD5CryptoServiceProvider().ComputeHash(file));
+                request.Headers[Constants.ETAG] = StringifyMD5(new MD5CryptoServiceProvider().ComputeHash(file));
             }
 
             if (_metadata != null && _metadata.Count > 0)
@@ -698,13 +698,21 @@ namespace com.mosso.cloudfiles.domain.request
                 }
             }
             //if (stream == null)
-               stream = new FileStream(_fileUrl, FileMode.Open);
+
+            request.AllowWriteStreamBuffering = false;
+            if (request.ContentLength < 1)
+                request.SendChunked = true;
+
+         //   var requestMimeType = request.ContentType;
+        //    request.ContentType = String.IsNullOrEmpty(requestMimeType)
+           //     ? "application/octet-stream" : requestMimeType;
+               filetosend = new FileStream(_fileUrl, FileMode.Open);
                ReadStreamIntoRequest(request.GetRequestStream());
                 
            // if (stream.Position == stream.Length)
            //     stream.Seek(0, 0);
 
-            stream.Close();
+            filetosend.Close();
            
         }
     }

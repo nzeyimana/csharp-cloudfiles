@@ -61,7 +61,13 @@ namespace com.mosso.cloudfiles.domain.request
             get { return _httpWebRequest.GetType(); }
         }
 
-     
+
+        public bool SendChunked
+        {
+            get { return _httpWebRequest.SendChunked; }
+            set { _httpWebRequest.SendChunked = value; }
+        }
+
         public Stream GetRequestStream()
         {
             return _httpWebRequest.GetRequestStream();
@@ -82,7 +88,7 @@ namespace com.mosso.cloudfiles.domain.request
          //   HandleIsModifiedSinceHeaderRequestFieldFor(_httpWebRequest);
             HandleRangeHeader(_httpWebRequest);
             if (_httpWebRequest.ContentLength > 0)
-            HandleRequestBodyFor(_httpWebRequest);
+           // HandleRequestBodyFor(_httpWebRequest);
             HandleProxyCredentialsFor(_httpWebRequest);
             return new CloudFilesResponse((HttpWebResponse)_httpWebRequest.GetResponse());
 
@@ -146,6 +152,12 @@ namespace com.mosso.cloudfiles.domain.request
         {
             get { return Headers[Constants.ETAG]; }
             set { Headers.Add(Constants.ETAG, value); }
+        }
+
+        public bool AllowWriteStreamBuffering
+        {
+            get { return _httpWebRequest.AllowWriteStreamBuffering; }
+            set { _httpWebRequest.AllowWriteStreamBuffering = value; }
         }
 
         public string UserAgent

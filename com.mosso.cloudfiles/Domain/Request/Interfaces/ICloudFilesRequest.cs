@@ -18,6 +18,8 @@ namespace com.mosso.cloudfiles.domain.request.Interfaces
         string ContentType { get; set; }
         DateTime IfModifiedSince { get; set; }
         string ETag { get; set; }
+        bool AllowWriteStreamBuffering { get; set; }
+        bool SendChunked { get; set; }
         Stream GetRequestStream();
     }
 }
