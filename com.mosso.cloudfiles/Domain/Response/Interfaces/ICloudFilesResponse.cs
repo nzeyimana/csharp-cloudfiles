@@ -22,6 +22,7 @@ namespace com.mosso.cloudfiles.domain.response.Interfaces
         IList<string> ContentBody { get; }
         string ContentType{ get; }
         string ETag { get; set; }
+        long ContentLength { get; }
         Stream GetResponseStream();
         void Dispose();
     }

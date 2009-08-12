@@ -12,6 +12,7 @@ using System.Xml;
 using com.mosso.cloudfiles.domain;
 using com.mosso.cloudfiles.domain.request;
 using com.mosso.cloudfiles.domain.response;
+using com.mosso.cloudfiles.domain.response.Interfaces;
 using com.mosso.cloudfiles.exceptions;
 using com.mosso.cloudfiles.utils;
 
@@ -1252,7 +1253,7 @@ namespace com.mosso.cloudfiles
                
 
                 var metadata = GetMetadata(getStorageItemResponse);
-                var storageItem = new StorageItem(storageItemName, metadata, getStorageItemResponse.ContentType, getStorageItemResponse.ContentStream, long.Parse(getStorageItemResponse.ContentLength));
+                var storageItem = new StorageItem(storageItemName, metadata, getStorageItemResponse.ContentType, getStorageItemResponse.GetResponseStream(), getStorageItemResponse.ContentLength);
 //                getStorageItemResponse.Dispose();
                 return storageItem;
             }
@@ -1272,7 +1273,7 @@ namespace com.mosso.cloudfiles
             }
         }
 
-        private Dictionary<string, string> GetMetadata(GetStorageItemResponse getStorageItemResponse)
+        private Dictionary<string, string> GetMetadata(ICloudFilesResponse getStorageItemResponse)
         {
             var metadata = new Dictionary<string, string>();
             var headers = getStorageItemResponse.Headers;
@@ -1498,12 +1499,14 @@ namespace com.mosso.cloudfiles
             
             try
             {
-                var getStorageItemResponse = _responseFactoryWithBody.CreateStorageItem(new CloudFilesRequest(getStorageItem, UserCredentials.ProxyCredentials));
+                var getStorageItemResponse = _requestfactory.Submit(getStorageItem, AuthToken, UserCredentials.ProxyCredentials);
                 foreach (var callback in callbackFuncs)
                 {
-                    getStorageItemResponse.Progress += callback;
+                    this.Progress += callback;
                 }
-                getStorageItemResponse.SaveStreamToDisk(localFileName);
+                var stream = getStorageItemResponse.GetResponseStream();
+                 
+                StoreFile(localFileName, stream);
             }
             catch (WebException we)
             {
@@ -1521,6 +1524,24 @@ namespace com.mosso.cloudfiles
             }
         }
 
+        private event ProgressCallback Progress;
+        
+        private void StoreFile(string filename,Stream contentStream )
+        {
+            FileStream fs = new FileStream(filename, FileMode.Create);
+
+            byte[] buffer = new byte[4096];
+
+            int amt = 0;
+            while ((amt = contentStream.Read(buffer, 0, buffer.Length)) != 0)
+            {
+                fs.Write(buffer, 0, amt);
+                if (Progress != null)
+                    Progress(amt);
+            }
+            fs.Close();
+            contentStream.Close();
+        }
         /// <summary>
         /// This method applies meta tags to a storage object on cloudfiles
         /// </summary>
@@ -1552,7 +1573,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var setStorageItemInformation = new SetStorageItemMetaInformation(StorageUrl, containerName, storageItemName, metadata);
-                new ResponseFactory().Create(new CloudFilesRequest(setStorageItemInformation, UserCredentials.ProxyCredentials));
+                _requestfactory.Submit(setStorageItemInformation, AuthToken,  UserCredentials.ProxyCredentials);
             }
             catch (WebException we)
             {
@@ -1596,9 +1617,9 @@ namespace com.mosso.cloudfiles
             try
             {
                 var getStorageItemInformation = new GetStorageItemInformation(StorageUrl, containerName, storageItemName);
-                var getStorageItemInformationResponse = 
-                    _responseFactory
-                    .Create(new CloudFilesRequest(getStorageItemInformation, UserCredentials.ProxyCredentials));
+                var getStorageItemInformationResponse = _requestfactory.Submit(getStorageItemInformation, AuthToken, UserCredentials.ProxyCredentials);
+                    
+                   
                 var storageItemInformation = new StorageItemInformation(getStorageItemInformationResponse.Headers);
 
                 return storageItemInformation;
@@ -1635,12 +1656,11 @@ namespace com.mosso.cloudfiles
             try
             {
                 var getPublicContainers = new GetPublicContainers(CdnManagementUrl);
-                var getPublicContainersResponse =
-                    _responseFactoryWithBody.Create(new CloudFilesRequest(getPublicContainers));
+                var getPublicContainersResponse = _requestfactory.Submit(getPublicContainers, AuthToken);
                 var containerList = getPublicContainersResponse.ContentBody;
                 getPublicContainersResponse.Dispose();
 
-                return containerList;
+                return containerList.ToList();
             }
             catch(WebException we)
             {
@@ -1679,7 +1699,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var request = new MarkContainerAsPublic(CdnManagementUrl, containerName, timeToLiveInSeconds);
-                var response = _responseFactory.Create(new CloudFilesRequest(request));
+                var response = _requestfactory.Submit(request, AuthToken);
                 
                 return response == null ? null : new Uri(response.Headers[Constants.X_CDN_URI]);
             }
@@ -1738,7 +1758,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var request = new SetPublicContainerDetails(CdnManagementUrl, containerName, false, -1);
-                _responseFactory.Create(new CloudFilesRequest(request));
+                _requestfactory.Submit(request, AuthToken);
             }
             catch(WebException we)
             {
@@ -1782,7 +1802,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var request = new SetPublicContainerDetails(CdnManagementUrl, containerName, true, timeToLiveInSeconds);
-               _responseFactory.Create(new CloudFilesRequest(request));
+                _requestfactory.Submit(request, AuthToken);
             }
             catch (WebException we)
             {
@@ -1825,8 +1845,7 @@ namespace com.mosso.cloudfiles
             try
             {
                 var request = new GetPublicContainerInformation(CdnManagementUrl, containerName);
-                var response = _responseFactory.Create(new CloudFilesRequest(request));
-
+                var response = _requestfactory.Submit(request, AuthToken);
                 return response == null ? 
                     null 
                     : new Container(containerName) 

@@ -24,6 +24,8 @@ namespace com.mosso.cloudfiles.domain.request
         /// <exception cref="System.ArgumentNullException">Thrown when any of the reference arguments are null</exception>
         public GetAuthentication(UserCredentials userCredentials)
         {
+            if(userCredentials == null)
+            throw new ArgumentNullException();
             _userCredentials = userCredentials;
         }
 

@@ -98,6 +98,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.DeleteStorageItemSpecs
         [Test]
         public void should_have_a_http_delete_method()
         {
+            _mockrequest.SetupGet(x => x.Headers).Returns(new WebHeaderCollection());
             deleteStorageItem.Apply(_mockrequest.Object);
             _mockrequest.VerifySet(x => x.Method = "DELETE");
           

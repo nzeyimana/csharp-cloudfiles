@@ -43,6 +43,8 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetAuthenticationSpecs
         [Test]
         public void should_have_a_http_head_method()
         {
+            var webrequest = new WebHeaderCollection();
+            _mockrequest.SetupGet(x => x.Headers).Returns(webrequest);
             getAuthentication.Apply(_mockrequest.Object);
             //this seems wrong as its not looking for HEAD
             _mockrequest.VerifySet(x => x.Method = "GET");
@@ -91,6 +93,8 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetAuthenticationSpecs
         [Test]
         public void should_have_a_http_head_method()
         {
+            var webrequest = new WebHeaderCollection();
+            _mockrequest.SetupGet(x => x.Headers).Returns(webrequest);
             getAuthentication.Apply(_mockrequest.Object);
             //this seems wrong as its not looking for HEAD
             _mockrequest.VerifySet(x => x.Method = "GET");

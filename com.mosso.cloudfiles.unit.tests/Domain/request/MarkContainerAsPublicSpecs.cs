@@ -78,22 +78,15 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.MarkContainerAsPublicSp
         public void should_have_a_http_put_method()
         {
 
+            var webrequest = new WebHeaderCollection();
+            _mockrequest.SetupGet(x => x.Headers).Returns(webrequest);
             var request = _mockrequest.Object;
+            
             markContainerAsPublic.Apply(request);
             _mockrequest.VerifySet(x=>x.Method="PUT");
             
         }
 
-        [Test]
-        public void should_have_an_auth_token_in_the_headers()
-        {
-            var request = _mockrequest.Object;
-            markContainerAsPublic.Apply(request);
-            var headers = new WebHeaderCollection();
-            _mockrequest.SetupGet(x => x.Headers).Returns(headers);
-            Assert.AreEqual("authtoken", headers[utils.Constants.X_AUTH_TOKEN]);
-        
-        }
     }
     
 }

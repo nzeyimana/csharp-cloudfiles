@@ -81,14 +81,6 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.CreateContainerSpecs
             mock.VerifySet(x=>x.Method="PUT");
         }
 
-        [Test]
-        public void should_have_a_auth_token_in_the_headers()
-        {
-            var mock = new Mock<ICloudFilesRequest>();
-            createContainer.Apply(mock.Object);
-            var webheaders = new WebHeaderCollection();
-            mock.SetupGet(x => x.Headers).Returns(webheaders);
-            Assert.That(webheaders[utils.Constants.X_AUTH_TOKEN], Is.EqualTo("authtoken"));
-        }
+       
     }
 }

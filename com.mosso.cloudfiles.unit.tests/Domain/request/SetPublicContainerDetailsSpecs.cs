@@ -1,5 +1,8 @@
 using System;
+using System.Net;
 using com.mosso.cloudfiles.domain.request;
+using com.mosso.cloudfiles.domain.request.Interfaces;
+using Moq;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
 
@@ -83,7 +86,12 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.SetPublicContainerDetai
         [Test]
         public void should_have_a_http_post_method()
         {
-            Asserts.AssertMethod(setPublicContainerDetails, "POST");
+            var mock = new Mock<ICloudFilesRequest>();
+            var headers = new WebHeaderCollection();
+            mock.SetupGet(x => x.Headers).Returns(headers);
+            setPublicContainerDetails.Apply(mock.Object);
+            mock.VerifySet(x => x.Method = "POST");
+            
            
         }
 

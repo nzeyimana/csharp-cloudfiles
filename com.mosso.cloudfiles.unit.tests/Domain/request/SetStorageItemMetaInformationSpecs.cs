@@ -96,7 +96,12 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.SetStorageItemMetaInfor
         [Test]
         public void should_have_a_http_post_method()
         {
-            Asserts.AssertMethod(setStorageItemInformation, "POST");
+            var mock = new Mock<ICloudFilesRequest>();
+            var headers = new WebHeaderCollection();
+            mock.SetupGet(x => x.Headers).Returns(headers);
+            setStorageItemInformation.Apply(mock.Object);
+            mock.VerifySet(x=>x.Method="POST");
+          
           
         }
 

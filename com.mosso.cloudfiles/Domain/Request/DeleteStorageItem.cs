@@ -32,14 +32,13 @@ namespace com.mosso.cloudfiles.domain.request
         /// <exception cref="StorageItemNameException">Thrown when the object name is invalid</exception>
         public DeleteStorageItem(string storageUrl,  string containerName, string storageItemName)
         {
-            if (string.IsNullOrEmpty(_storageUrl)
-            
-            || string.IsNullOrEmpty(_containerName)
-            || string.IsNullOrEmpty(_storageItemName))
+            if (string.IsNullOrEmpty(storageUrl)
+            || string.IsNullOrEmpty(containerName)
+            || string.IsNullOrEmpty(storageItemName))
                 throw new ArgumentNullException();
 
-            if (!ContainerNameValidator.Validate(_containerName)) throw new ContainerNameException();
-            if (!ObjectNameValidator.Validate(_storageItemName)) throw new StorageItemNameException();
+            if (!ContainerNameValidator.Validate(containerName)) throw new ContainerNameException();
+            if (!ObjectNameValidator.Validate(storageItemName)) throw new StorageItemNameException();
 
             _storageUrl = storageUrl;
          

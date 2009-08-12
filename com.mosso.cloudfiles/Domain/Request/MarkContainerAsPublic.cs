@@ -37,6 +37,7 @@ namespace com.mosso.cloudfiles.domain.request
                 throw new ArgumentNullException();
 
             _cdnManagementUrl = cdnManagementUrl;
+            _containerName = containerName;
             _timeToLiveInSeconds = timeToLiveInSeconds;
             
         }

@@ -82,7 +82,8 @@ namespace com.mosso.cloudfiles.domain.response
 
         public string ContentType
         {
-            get { return _webResponse.ContentType; }
+            get { return 
+                _webResponse.ContentType; }
         }
 
         public string ETag
@@ -91,9 +92,14 @@ namespace com.mosso.cloudfiles.domain.response
             set { throw new NotImplementedException(); }
         }
 
+        public long ContentLength
+        {
+            get { return _webResponse.ContentLength; }
+        }
+
         public Stream GetResponseStream()
         {
-            return _webResponse.GetResponseStream();
+            return  _webResponse.GetResponseStream();
         }
 
         public void Dispose()
