@@ -70,6 +70,7 @@
     <Compile Include="Domain\CF\AccountSpecs.cs" />
     <Compile Include="Domain\CF\ContainerSpecs.cs" />
     <Compile Include="Domain\CF\ObjectSpecs.cs" />
+    <Compile Include="Domain\CloudFileResponseSpec.cs" />
     <Compile Include="Domain\DeleteContainerItemSpecs.cs" />
     <Compile Include="Domain\DeleteContainerSpecs.cs" />
     <Compile Include="Domain\GetAccountInformationSpecs.cs" />

@@ -19,13 +19,39 @@ namespace com.mosso.cloudfiles.domain.response
     {
         private readonly HttpWebResponse _webResponse;
         private IList<string> _contentbody = new List<string>();
+        private MemoryStream memstream = new MemoryStream( );
+        private Stream Getstream()
+        {
+            memstream.Seek(0, 0);
+            var copystream = new MemoryStream();
+            CopyToMemory(memstream, copystream);
+            return copystream;
+        }
         public CloudFilesResponse(HttpWebResponse webResponse)
         {
             _webResponse = webResponse;
-            GetBody(_webResponse.GetResponseStream());
+            CopyToMemory(_webResponse.GetResponseStream(), memstream);
+            
+            GetBody(Getstream());
+        }
+        private void CopyToMemory(Stream input, Stream output)
+        {
+            byte[] buffer = new byte[32768];
+            while (true)
+            {
+                int read = input.Read(buffer, 0, buffer.Length);
+                if (read <= 0)
+                {
+                    output.Seek(0, 0);
+                    return;
+                }
+                output.Write(buffer, 0, read);
+            }
+            
         }
         private void GetBody(Stream stream)
         {
+             
             using(var reader = new StreamReader(stream))
             {
                 var line = "";
@@ -110,11 +136,13 @@ namespace com.mosso.cloudfiles.domain.response
 
         public Stream GetResponseStream()
         {
-            return  _webResponse.GetResponseStream();
+            
+            return  Getstream();
         }
 
         public void Dispose()
         {
+            memstream.Close();
             _webResponse.Close();
         }
     }
