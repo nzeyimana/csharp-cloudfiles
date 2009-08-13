@@ -641,38 +641,12 @@ namespace com.mosso.cloudfiles.domain.request
 
     
 
-        private static string StringifyMD5(byte[] bytes)
-        {
-            StringBuilder result = new StringBuilder();
-            foreach (byte b in bytes)
-                result.AppendFormat("{0:x2}", b);
-            return result.ToString();
-        }
+       
         private string CleanUpFilePath(string filePath)
         {
             return filePath.StripSlashPrefix().Replace(@"file:\\\", "");
         }
 
-        private void ReadStreamIntoRequest(Stream httpWebRequestFileStream)
-        {
-            byte[] buffer = new byte[Constants.CHUNK_SIZE];
-
-            var amt = 0;
-            while ((amt = filetosend.Read(buffer, 0, buffer.Length)) != 0)
-            {
-                httpWebRequestFileStream.Write(buffer, 0, amt);
-
-                //Fire the progress event
-                if (Progress != null)
-                {
-                    Progress(amt);
-                }
-            }
-
-            filetosend.Close();
-            httpWebRequestFileStream.Flush();
-            httpWebRequestFileStream.Close();
-        }
         #endregion 
         public Uri CreateUri()
         {
@@ -692,43 +666,11 @@ namespace com.mosso.cloudfiles.domain.request
                     request.Headers.Add(Constants.META_DATA_HEADER + s, _metadata[s]);
                 }
             }
-            //if (stream == null)
 
             request.AllowWriteStreamBuffering = false;
-           // if (request.ContentLength < 1)
-              //  request.SendChunked = true;
-
-            //using (var file = new FileStream(_fileUrl, FileMode.Open))
-           // {
-                request.ContentType = this.ContentType();
-                request.ContentLength = filetosend.Length;
-                request.Headers[Constants.ETAG] = StringifyMD5(new MD5CryptoServiceProvider().ComputeHash(filetosend));
-               filetosend.Seek(0, 0);
-                BinaryWriter writer = new BinaryWriter(request.GetRequestStream());
-            BinaryReader reader = new BinaryReader(filetosend);
-            var bytes =
-                reader.ReadBytes(Convert.ToInt32(filetosend.Length));
-            foreach (var b in bytes)
-            {
-                writer.Write(b);
-            }
-            reader.Close();
-            writer.Flush();
-                writer.Close();
-               // ReadStreamIntoRequest(request.GetRequestStream());
-           // filetosend.Close();
-           // }
-         //   var requestMimeType = request.ContentType;
-        //    request.ContentType = String.IsNullOrEmpty(requestMimeType)
-           //     ? "application/octet-stream" : requestMimeType;
-//               filetosend = new FileStream(_fileUrl, FileMode.Open);
-               
-                
-           // if (stream.Position == stream.Length)
-           //     stream.Seek(0, 0);
-
-//            filetosend.Close();
-           
+        
+            request.ContentType = this.ContentType();
+            request.SetContent(filetosend);
         }
        
     }

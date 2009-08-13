@@ -3,9 +3,14 @@
 ///
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using com.mosso.cloudfiles.domain.request.Interfaces;
 using com.mosso.cloudfiles.domain.response;
@@ -21,8 +26,30 @@ namespace com.mosso.cloudfiles.domain.request
     {
         private HttpWebRequest _httpWebRequest;
         private readonly ProxyCredentials proxyCredentials;
-       
+        private IList<Byte> _contentStream = new List<Byte>();
 
+        public void SetContent(Stream stream)
+        {
+            
+            this.ContentLength = stream.Length;
+       
+            using(var binaryreader = new BinaryReader(stream))
+            {
+                
+
+                for (int i = 0; i < stream.Length; i++)
+                {
+                    _contentStream.Add(binaryreader.ReadByte());
+                }
+
+            }
+           this.ETag =  StringifyMD5(new MD5CryptoServiceProvider().ComputeHash(this.ContentStream));
+          
+        }
+        public Byte[] ContentStream
+        {
+            get { return _contentStream.ToArray(); }
+        }
         /// <summary>
         /// temp
         /// </summary>
@@ -86,9 +113,10 @@ namespace com.mosso.cloudfiles.domain.request
             _httpWebRequest.UserAgent = Constants.USER_AGENT;
 
          //   HandleIsModifiedSinceHeaderRequestFieldFor(_httpWebRequest);
+
             HandleRangeHeader(_httpWebRequest);
             if (_httpWebRequest.ContentLength > 0)
-           // HandleRequestBodyFor(_httpWebRequest);
+                AttachBodyToWebRequest(_httpWebRequest);
             HandleProxyCredentialsFor(_httpWebRequest);
             return new CloudFilesResponse((HttpWebResponse)_httpWebRequest.GetResponse());
 
@@ -123,7 +151,7 @@ namespace com.mosso.cloudfiles.domain.request
         public long ContentLength
         {
             get { return _httpWebRequest.ContentLength; }
-            set { _httpWebRequest.ContentLength = value; }
+            private set { _httpWebRequest.ContentLength = value; }
         }
 
         public int RangeTo
@@ -151,7 +179,7 @@ namespace com.mosso.cloudfiles.domain.request
         public string ETag
         {
             get { return Headers[Constants.ETAG]; }
-            set { Headers.Add(Constants.ETAG, value); }
+           private set { Headers.Add(Constants.ETAG, value); }
         }
 
         public bool AllowWriteStreamBuffering
@@ -177,11 +205,6 @@ namespace com.mosso.cloudfiles.domain.request
                 webrequest.AddRange("bytes", this.RangeFrom, this.RangeTo);
         }
 
-       // private void HandleIsModifiedSinceHeaderRequestFieldFor(HttpWebRequest webrequest)
-     //   {
-   //         if (!(_httpWebRequest is IModifiedSinceRequest)) return;
-    //      //  webrequest.IfModifiedSince = ((IModifiedSinceRequest)request).ModifiedSince; //commented by ryan
-    //    }
 
         private void HandleProxyCredentialsFor(HttpWebRequest httpWebRequest)
         {
@@ -193,26 +216,40 @@ namespace com.mosso.cloudfiles.domain.request
                 loProxy.Credentials = new NetworkCredential(proxyCredentials.ProxyUsername, proxyCredentials.ProxyPassword, proxyCredentials.ProxyDomain);
             httpWebRequest.Proxy = loProxy;
         }
-
-        private void HandleRequestBodyFor(HttpWebRequest httpWebRequest)
+        private void AttachBodyToWebRequest(HttpWebRequest request)
         {
-            //   if (!(request is IRequestWithContentBody)) return; //commented by ryan
+            BinaryWriter writer = new BinaryWriter(request.GetRequestStream());
+            foreach(Byte b in this._contentStream)
+            {
+                writer.Write(b);
+            }
 
-            //    var requestWithContentBody = (IRequestWithContentBody) request;  //commented by ryan
-            //    httpWebRequest.ContentLength = requestWithContentBody.ContentLength; //commented by ryan
-            
-            httpWebRequest.AllowWriteStreamBuffering = false;
-            if(httpWebRequest.ContentLength < 1)
-                httpWebRequest.SendChunked = true;
-
-            var requestMimeType = _httpWebRequest.ContentType;
-            httpWebRequest.ContentType = String.IsNullOrEmpty(requestMimeType) 
-                ? "application/octet-stream" : requestMimeType;
-
-            //var stream = httpWebRequest.GetRequestStream();
-            
-            //    requestWithContentBody.ReadFileIntoRequest(stream); //commented by ryan
+            writer.Flush();
+            writer.Close();
+               
         }
+        private static string StringifyMD5(byte[] bytes)
+        {
+            StringBuilder result = new StringBuilder();
+            foreach (byte b in bytes)
+                result.AppendFormat("{0:x2}", b);
+            return result.ToString();
+        }
+//        private void HandleRequestBodyFor(HttpWebRequest httpWebRequest)
+//        {
+//           
+//            httpWebRequest.AllowWriteStreamBuffering = false;
+//            if(httpWebRequest.ContentLength < 1)
+//                httpWebRequest.SendChunked = true;
+//
+//            var requestMimeType = _httpWebRequest.ContentType;
+//            httpWebRequest.ContentType = String.IsNullOrEmpty(requestMimeType) 
+//                ? "application/octet-stream" : requestMimeType;
+//
+//            //var stream = httpWebRequest.GetRequestStream();
+//            
+//            //request.ReadFileIntoRequest(stream); //commented by ryan
+//        }
 
         
     }

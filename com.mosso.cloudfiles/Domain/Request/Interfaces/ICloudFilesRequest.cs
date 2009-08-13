@@ -11,15 +11,17 @@ namespace com.mosso.cloudfiles.domain.request.Interfaces
         Uri RequestUri { get; }
         string Method { get; set; }
         WebHeaderCollection Headers { get; }
-       
-        long ContentLength { get; set; }
+
+        long ContentLength { get;  }
         int RangeTo { get; set; }
         int RangeFrom { get; set; }
         string ContentType { get; set; }
         DateTime IfModifiedSince { get; set; }
-        string ETag { get; set; }
+        string ETag { get;  }
         bool AllowWriteStreamBuffering { get; set; }
         bool SendChunked { get; set; }
+        Byte[] ContentStream { get; }
         Stream GetRequestStream();
+        void SetContent(Stream stream);
     }
 }
