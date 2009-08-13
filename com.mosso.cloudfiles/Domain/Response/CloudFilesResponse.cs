@@ -22,8 +22,19 @@ namespace com.mosso.cloudfiles.domain.response
         public CloudFilesResponse(HttpWebResponse webResponse)
         {
             _webResponse = webResponse;
+            GetBody(_webResponse.GetResponseStream());
         }
-
+        private void GetBody(Stream stream)
+        {
+            using(var reader = new StreamReader(stream))
+            {
+                var line = "";
+                while((line = reader.ReadLine())!= null)
+                {
+                    _contentbody.Add(line);
+                }
+            }
+        }
         /// <summary>
         /// A property representing the HTTP Status code returned from cloudfiles
         /// </summary>

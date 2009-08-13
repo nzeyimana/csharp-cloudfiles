@@ -207,7 +207,7 @@ namespace com.mosso.cloudfiles
                 var getAccountInformationJson = new GetAccountInformationSerialized(StorageUrl, Format.JSON);
                 var getAccountInformationJsonResponse = _requestfactory.Submit(getAccountInformationJson, AuthToken);
 
-                if (getAccountInformationJsonResponse.ContentBody.Count == 0) return "";
+                if (getAccountInformationJsonResponse.ContentBody.Count < 1) return "";
                 var jsonResponse = String.Join("", getAccountInformationJsonResponse.ContentBody.ToArray());
 
                 getAccountInformationJsonResponse.Dispose();
@@ -537,9 +537,16 @@ namespace com.mosso.cloudfiles
             {
                 var getContainerInformation = new GetContainerInformation(StorageUrl, containerName);
                 var getContainerInformationResponse = _requestfactory.Submit(getContainerInformation, AuthToken, UserCredentials.ProxyCredentials);
-                var container = new Container(containerName);
-                container.ByteCount = long.Parse(getContainerInformationResponse.Headers[Constants.X_CONTAINER_BYTES_USED]);
-                container.ObjectCount = long.Parse(getContainerInformationResponse.Headers[Constants.X_CONTAINER_STORAGE_OBJECT_COUNT]);
+                var container = new Container(containerName)
+                                    {
+                                        ByteCount =
+                                            long.Parse(
+                                            getContainerInformationResponse.Headers[Constants.X_CONTAINER_BYTES_USED]),
+                                        ObjectCount =
+                                            long.Parse(
+                                            getContainerInformationResponse.Headers[
+                                                Constants.X_CONTAINER_STORAGE_OBJECT_COUNT])
+                                    };
                 var url  = getContainerCDNUri(container) ;
                 if(!string.IsNullOrEmpty(url))
                     url += "/";
