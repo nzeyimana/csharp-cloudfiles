@@ -1533,19 +1533,18 @@ namespace com.mosso.cloudfiles
         
         private void StoreFile(string filename,Stream contentStream )
         {
-            FileStream fs = new FileStream(filename, FileMode.Create);
-
-            byte[] buffer = new byte[4096];
-
-            int amt = 0;
-            while ((amt = contentStream.Read(buffer, 0, buffer.Length)) != 0)
+            using(var writer = new BinaryWriter(File.Create(filename)))
             {
-                fs.Write(buffer, 0, amt);
-                if (Progress != null)
-                    Progress(amt);
+                using(var reader = new BinaryReader(contentStream ))
+                {
+                    Byte b;
+                    while((b = reader.ReadByte())!=-1)
+                    {
+                        writer.Write(b);
+                    }
+                }
             }
-            fs.Close();
-            contentStream.Close();
+
         }
         /// <summary>
         /// This method applies meta tags to a storage object on cloudfiles
