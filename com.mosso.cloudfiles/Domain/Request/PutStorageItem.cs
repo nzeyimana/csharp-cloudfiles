@@ -695,16 +695,27 @@ namespace com.mosso.cloudfiles.domain.request
             //if (stream == null)
 
             request.AllowWriteStreamBuffering = false;
-            if (request.ContentLength < 1)
-                request.SendChunked = true;
+           // if (request.ContentLength < 1)
+              //  request.SendChunked = true;
 
             //using (var file = new FileStream(_fileUrl, FileMode.Open))
            // {
                 request.ContentType = this.ContentType();
                 request.ContentLength = filetosend.Length;
                 request.Headers[Constants.ETAG] = StringifyMD5(new MD5CryptoServiceProvider().ComputeHash(filetosend));
-                filetosend.Seek(0, 0);
-                ReadStreamIntoRequest(request.GetRequestStream());
+               filetosend.Seek(0, 0);
+                BinaryWriter writer = new BinaryWriter(request.GetRequestStream());
+            BinaryReader reader = new BinaryReader(filetosend);
+            var bytes =
+                reader.ReadBytes(Convert.ToInt32(filetosend.Length));
+            foreach (var b in bytes)
+            {
+                writer.Write(b);
+            }
+            reader.Close();
+            writer.Flush();
+                writer.Close();
+               // ReadStreamIntoRequest(request.GetRequestStream());
            // filetosend.Close();
            // }
          //   var requestMimeType = request.ContentType;

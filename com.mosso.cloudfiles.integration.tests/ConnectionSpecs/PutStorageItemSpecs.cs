@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using com.mosso.cloudfiles.domain;
 using com.mosso.cloudfiles.exceptions;
@@ -109,7 +110,31 @@ namespace com.mosso.cloudfiles.integration.tests.ConnectionSpecs.PutStorageItemS
         {
             
             connection.CreateContainer(Constants.CONTAINER_NAME);
-
+            //var webrequest =
+            //    (HttpWebRequest)
+            //    WebRequest.Create( 
+            //       "https://storage.clouddrive.com/v1/MossoCloudFS_5d8f3dca-7eb9-4453-aa79-2eea1b980353/integration.tests.container/TestStorageItem.txt");
+            //webrequest.Method = "PUT";
+            //webrequest.ContentType = "text/plain";
+            //webrequest.ContentLength = 34;
+            //webrequest.UserAgent = "csharp-cloudfiles";
+          
+            //webrequest.Headers.Add("ETag"," 5c66108b7543c6f16145e25df9849f7f");
+     
+            //webrequest.Headers.Add("X-Auth-Token","0addec49-1212-422d-8b1a-5c6091b3b3d9");
+    
+            
+           
+            //var writer = new BinaryWriter(webrequest.GetRequestStream());
+            //var bytes = File.ReadAllBytes(Constants.StorageItemName);
+            //foreach (var b in bytes)
+            //{
+            //    writer.Write(b);
+            //}
+            //writer.Flush();
+            //writer.Close();
+            
+            //var response = webrequest.GetResponse();
             StorageItem storageItem = null;
             try
             {

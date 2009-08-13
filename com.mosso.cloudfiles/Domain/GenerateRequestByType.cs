@@ -41,8 +41,9 @@ namespace com.mosso.cloudfiles.domain.request
         public ICloudFilesResponse Submit(IAddToWebRequest requesttype, string authtoken, ProxyCredentials credentials)
         {
             var cfrequest = _factory.Create(requesttype.CreateUri(),credentials);
-            requesttype.Apply(cfrequest);
             cfrequest.Headers.Add(Constants.X_AUTH_TOKEN, HttpUtility.UrlEncode(authtoken));
+            requesttype.Apply(cfrequest);
+           
             var response = new ResponseFactory().Create(cfrequest);
             return response;
         }
