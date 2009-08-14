@@ -40,7 +40,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerInformationS
                 testHelper.PutItemInContainer(Constants.StorageItemName, Constants.StorageItemName);
                 var getContainerInformation = new GetContainerInformation(storageUrl,  containerName);
 
-                var informationResponse = new GenerateRequestByType().Submit(getContainerInformation);
+                var informationResponse = new GenerateRequestByType().Submit(getContainerInformation, authToken);
                 Assert.That(informationResponse.Status, Is.EqualTo(HttpStatusCode.NoContent));
                 Assert.That(informationResponse.Headers[Constants.XContainerObjectCount], Is.EqualTo("1"));
                 Assert.That(informationResponse.Headers[Constants.XContainerBytesUsed], (Is.Not.Null));
