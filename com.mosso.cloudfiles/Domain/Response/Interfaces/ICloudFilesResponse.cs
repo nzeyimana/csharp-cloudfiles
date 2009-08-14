@@ -25,5 +25,6 @@ namespace com.mosso.cloudfiles.domain.response.Interfaces
         long ContentLength { get; }
         Stream GetResponseStream();
         void Dispose();
+        event Connection.ProgressCallback Progress;
     }
 }

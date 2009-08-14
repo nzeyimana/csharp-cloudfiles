@@ -271,6 +271,8 @@ namespace com.mosso.cloudfiles.integration.tests.ConnectionSpecs.PutStorageItemS
 
                 //Sleep to make sure we receive the message
                 Thread.Sleep(3000);
+
+             
             }
             catch (Exception e)
             {
@@ -297,8 +299,8 @@ namespace com.mosso.cloudfiles.integration.tests.ConnectionSpecs.PutStorageItemS
 
         private void operationComplete()
         {
-            connection.DeleteStorageItem(Constants.CONTAINER_NAME, Constants.StorageItemName);
-            connection.DeleteContainer(Constants.CONTAINER_NAME);
+//            connection.DeleteStorageItem(Constants.CONTAINER_NAME, Constants.StorageItemName);
+//            connection.DeleteContainer(Constants.CONTAINER_NAME);
             operationCompleted = true;
         }
 

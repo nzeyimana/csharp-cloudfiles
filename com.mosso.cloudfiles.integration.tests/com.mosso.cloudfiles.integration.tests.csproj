@@ -87,7 +87,7 @@
     <Compile Include="ConnectionSpecs\DeleteContainerSpecs.cs" />
     <Compile Include="ConnectionSpecs\DeleteStorageItemSpecs.cs" />
     <Compile Include="ConnectionSpecs\GetStorageItemSpecs.cs" />
-    <Compile Include="ConnectionSpecs\GetPublicContainerInformationSpecs.cs" />
+    <Compile Include="GetPublicContainerInformationSpecs.cs" />
     <Compile Include="ConnectionSpecs\GetPublicContainersSpecs.cs" />
     <Compile Include="ConnectionSpecs\MarkContainerAsPublicSpecs.cs" />
     <Compile Include="ConnectionSpecs\PutStorageItemSpecs.cs" />

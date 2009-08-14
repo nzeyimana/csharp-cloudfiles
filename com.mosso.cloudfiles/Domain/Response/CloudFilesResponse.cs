@@ -23,15 +23,15 @@ namespace com.mosso.cloudfiles.domain.response
         private Stream Getstream()
         {
             memstream.Seek(0, 0);
-            var copystream = new MemoryStream();
-            CopyToMemory(memstream, copystream);
-            return copystream;
+        //    var copystream = new MemoryStream();
+         //   CopyToMemory(memstream, copystream);
+            return memstream;
         }
         public CloudFilesResponse(HttpWebResponse webResponse)
         {
             _webResponse = webResponse;
             CopyToMemory(_webResponse.GetResponseStream(), memstream);
-           // if (HasTextBody())
+            if (HasTextBody())
             try
             {
                 GetBody(Getstream());
@@ -45,7 +45,10 @@ namespace com.mosso.cloudfiles.domain.response
 
         private bool HasTextBody()
         {
-            return (_webResponse.ContentType == "application/json; charset=utf-8" || _webResponse.ContentType == "application/xml; charset=utf-8" || _webResponse.ContentType == "text/plain") && _webResponse.ContentLength == -1;
+            return (_webResponse.ContentType == "application/json; charset=utf-8" ||
+                _webResponse.ContentType == "application/xml; charset=utf-8" ||
+                _webResponse.ContentType == "text/plain") && 
+                _webResponse.ContentLength == -1;
         }
 
         private void CopyToMemory(Stream input, Stream output)
@@ -159,5 +162,7 @@ namespace com.mosso.cloudfiles.domain.response
             memstream.Close();
             _webResponse.Close();
         }
+
+        public event Connection.ProgressCallback Progress;
     }
 }

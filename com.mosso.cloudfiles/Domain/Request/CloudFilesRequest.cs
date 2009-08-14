@@ -24,44 +24,39 @@ namespace com.mosso.cloudfiles.domain.request
     /// </summary>
     public class CloudFilesRequest : ICloudFilesRequest
     {
-        private HttpWebRequest _httpWebRequest;
-        private readonly ProxyCredentials proxyCredentials;
-        private IList<Byte> _contentStream = new List<Byte>();
+        private readonly HttpWebRequest _httpWebRequest;
+        private readonly ProxyCredentials _proxyCredentials;
+        private event Connection.ProgressCallback Progress;
 
-        public void SetContent(Stream stream)
+        public void SetContent(Stream stream, Connection.ProgressCallback progress)
         {
-            
+            this.ContentStream = stream;
             this.ContentLength = stream.Length;
-       
-            using(var binaryreader = new BinaryReader(stream))
-            {
-                
+            this.Progress = progress;
 
-                for (int i = 0; i < stream.Length; i++)
-                {
-                    _contentStream.Add(binaryreader.ReadByte());
-                }
+            this.ETag = StringifyMD5(new MD5CryptoServiceProvider().ComputeHash(this.ContentStream));
+            this.ContentStream.Seek(0, 0);
 
-            }
-           this.ETag =  StringifyMD5(new MD5CryptoServiceProvider().ComputeHash(this.ContentStream));
-          
         }
-        public Byte[] ContentStream
+        public Stream ContentStream
         {
-            get { return _contentStream.ToArray(); }
+            get;
+            private set;
         }
         /// <summary>
         /// temp
         /// </summary>
-        public CloudFilesRequest(Uri uri): this( WebRequest.Create(uri) as HttpWebRequest)
+        public CloudFilesRequest(Uri uri)
+            : this(WebRequest.Create(uri) as HttpWebRequest)
         {
-            
+
         }
         /// <summary>
         /// Constructor without proxy credentials provided
         /// </summary>
         /// <param name="request">The request being sent to the server</param>
-        public CloudFilesRequest(HttpWebRequest request) : this(request, null)
+        public CloudFilesRequest(HttpWebRequest request)
+            : this(request, null)
         {
         }
 
@@ -76,9 +71,9 @@ namespace com.mosso.cloudfiles.domain.request
             if (request == null) throw new ArgumentNullException();
 
             this._httpWebRequest = request;
-            this.proxyCredentials = proxyCredentials;
+            this._proxyCredentials = proxyCredentials;
         }
-        
+
         /// <summary>
         /// RequestType
         /// </summary>
@@ -105,14 +100,14 @@ namespace com.mosso.cloudfiles.domain.request
         /// <returns>a HttpWebRequest object that has all the information to make a request against CloudFiles</returns>
         public ICloudFilesResponse GetResponse()
         {
-            
-    
 
-          
+
+
+
             _httpWebRequest.Timeout = Constants.CONNECTION_TIMEOUT;
             _httpWebRequest.UserAgent = Constants.USER_AGENT;
 
-         //   HandleIsModifiedSinceHeaderRequestFieldFor(_httpWebRequest);
+            //   HandleIsModifiedSinceHeaderRequestFieldFor(_httpWebRequest);
 
             HandleRangeHeader(_httpWebRequest);
             if (_httpWebRequest.ContentLength > 0)
@@ -122,13 +117,13 @@ namespace com.mosso.cloudfiles.domain.request
 
         }
 
-        
+
         public Uri RequestUri
         {
             get { return this._httpWebRequest.RequestUri; }
         }
 
-        
+
 
         public string Method
         {
@@ -156,12 +151,14 @@ namespace com.mosso.cloudfiles.domain.request
 
         public int RangeTo
         {
-            set; get;
+            set;
+            get;
         }
 
         public int RangeFrom
         {
-            set; get;
+            set;
+            get;
         }
 
         public string ContentType
@@ -179,7 +176,7 @@ namespace com.mosso.cloudfiles.domain.request
         public string ETag
         {
             get { return Headers[Constants.ETAG]; }
-           private set { Headers.Add(Constants.ETAG, value); }
+            private set { Headers.Add(Constants.ETAG, value); }
         }
 
         public bool AllowWriteStreamBuffering
@@ -196,7 +193,7 @@ namespace com.mosso.cloudfiles.domain.request
 
         private void HandleRangeHeader(HttpWebRequest webrequest)
         {
-            
+
             if (this.RangeFrom != 0 && this.RangeTo == 0)
                 webrequest.AddRange("bytes", this.RangeFrom);
             else if (this.RangeFrom == 0 && this.RangeTo != 0)
@@ -208,25 +205,36 @@ namespace com.mosso.cloudfiles.domain.request
 
         private void HandleProxyCredentialsFor(HttpWebRequest httpWebRequest)
         {
-            if (proxyCredentials == null) return;
-            
-            var loProxy = new WebProxy(proxyCredentials.ProxyAddress, true);
+            if (_proxyCredentials == null) return;
 
-            if (proxyCredentials.ProxyUsername.Length > 0)
-                loProxy.Credentials = new NetworkCredential(proxyCredentials.ProxyUsername, proxyCredentials.ProxyPassword, proxyCredentials.ProxyDomain);
+            var loProxy = new WebProxy(_proxyCredentials.ProxyAddress, true);
+
+            if (_proxyCredentials.ProxyUsername.Length > 0)
+                loProxy.Credentials = new NetworkCredential(_proxyCredentials.ProxyUsername, _proxyCredentials.ProxyPassword, _proxyCredentials.ProxyDomain);
             httpWebRequest.Proxy = loProxy;
         }
         private void AttachBodyToWebRequest(HttpWebRequest request)
         {
-            BinaryWriter writer = new BinaryWriter(request.GetRequestStream());
-            foreach(Byte b in this._contentStream)
+            using (var webstream = request.GetRequestStream())
             {
-                writer.Write(b);
+                byte[] buffer = new byte[Constants.CHUNK_SIZE];
+
+                var amt = 0;
+                while ((amt = ContentStream.Read(buffer, 0, buffer.Length)) != 0)
+                {
+                    webstream.Write(buffer, 0, amt);
+
+                    //Fire the progress event
+                    if (this.Progress != null)
+                    {
+                        this.Progress(amt);
+                    }
+                }
+
+                ContentStream.Close();
+                webstream.Flush();
             }
 
-            writer.Flush();
-            writer.Close();
-               
         }
         private static string StringifyMD5(byte[] bytes)
         {
@@ -235,22 +243,22 @@ namespace com.mosso.cloudfiles.domain.request
                 result.AppendFormat("{0:x2}", b);
             return result.ToString();
         }
-//        private void HandleRequestBodyFor(HttpWebRequest httpWebRequest)
-//        {
-//           
-//            httpWebRequest.AllowWriteStreamBuffering = false;
-//            if(httpWebRequest.ContentLength < 1)
-//                httpWebRequest.SendChunked = true;
-//
-//            var requestMimeType = _httpWebRequest.ContentType;
-//            httpWebRequest.ContentType = String.IsNullOrEmpty(requestMimeType) 
-//                ? "application/octet-stream" : requestMimeType;
-//
-//            //var stream = httpWebRequest.GetRequestStream();
-//            
-//            //request.ReadFileIntoRequest(stream); //commented by ryan
-//        }
+        //        private void HandleRequestBodyFor(HttpWebRequest httpWebRequest)
+        //        {
+        //           
+        //            httpWebRequest.AllowWriteStreamBuffering = false;
+        //            if(httpWebRequest.ContentLength < 1)
+        //                httpWebRequest.SendChunked = true;
+        //
+        //            var requestMimeType = _httpWebRequest.ContentType;
+        //            httpWebRequest.ContentType = String.IsNullOrEmpty(requestMimeType) 
+        //                ? "application/octet-stream" : requestMimeType;
+        //
+        //            //var stream = httpWebRequest.GetRequestStream();
+        //            
+        //            //request.ReadFileIntoRequest(stream); //commented by ryan
+        //        }
 
-        
+
     }
 }

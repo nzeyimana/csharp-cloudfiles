@@ -29,7 +29,7 @@ namespace com.mosso.cloudfiles.domain.request
         private string _fileUrl;
        
 
-        public event Connection.ProgressCallback Progress;
+       public event Connection.ProgressCallback Progress;
 
         /// <summary>
         /// PutStorageItem constructor
@@ -670,7 +670,7 @@ namespace com.mosso.cloudfiles.domain.request
             request.AllowWriteStreamBuffering = false;
         
             request.ContentType = this.ContentType();
-            request.SetContent(filetosend);
+            request.SetContent(filetosend, Progress);
         }
        
     }

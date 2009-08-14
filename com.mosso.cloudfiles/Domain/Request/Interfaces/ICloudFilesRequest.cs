@@ -20,8 +20,8 @@ namespace com.mosso.cloudfiles.domain.request.Interfaces
         string ETag { get;  }
         bool AllowWriteStreamBuffering { get; set; }
         bool SendChunked { get; set; }
-        Byte[] ContentStream { get; }
+        Stream ContentStream { get; }
         Stream GetRequestStream();
-        void SetContent(Stream stream);
+        void SetContent(Stream stream, Connection.ProgressCallback progress);
     }
 }
