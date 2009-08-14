@@ -35,8 +35,8 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerInformationS
         public void Should_return_no_content_when_the_container_exists_and_the_name_contains_spaces()
         {
             const string containerName = "I am making a funky container";
-            using (TestHelper testHelper = new TestHelper(authToken, storageUrl, containerName))
-            {
+            TestHelper testHelper = new TestHelper(authToken, storageUrl, containerName);
+            
                 testHelper.PutItemInContainer(Constants.StorageItemName, Constants.StorageItemName);
                 var getContainerInformation = new GetContainerInformation(storageUrl,  containerName);
 
@@ -45,7 +45,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerInformationS
                 Assert.That(informationResponse.Headers[Constants.XContainerObjectCount], Is.EqualTo("1"));
                 Assert.That(informationResponse.Headers[Constants.XContainerBytesUsed], (Is.Not.Null));
                 testHelper.DeleteItemFromContainer(Constants.StorageItemName);
-            }
+            testHelper.Dispose();
         }
 
         [Test]
