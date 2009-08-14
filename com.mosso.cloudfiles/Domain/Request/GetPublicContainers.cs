@@ -26,6 +26,7 @@ namespace com.mosso.cloudfiles.domain.request
         public void Apply(ICloudFilesRequest request)
         {
             request.Method = "GET";
+            
         }
     }
 }

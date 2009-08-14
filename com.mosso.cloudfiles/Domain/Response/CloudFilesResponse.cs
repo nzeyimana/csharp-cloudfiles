@@ -47,7 +47,7 @@ namespace com.mosso.cloudfiles.domain.response
         {
             return (_webResponse.ContentType == "application/json; charset=utf-8" ||
                 _webResponse.ContentType == "application/xml; charset=utf-8" ||
-                _webResponse.ContentType == "text/plain") && 
+                _webResponse.ContentType.Contains("text/plain")) && 
                 _webResponse.ContentLength == -1;
         }
 
