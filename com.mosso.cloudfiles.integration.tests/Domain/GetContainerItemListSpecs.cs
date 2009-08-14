@@ -65,7 +65,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
             
             try
             {
-                var factory = GetMockRequestFactory("NASTTestUserAgent", uri);
+                var factory = new  RequestFactoryWithAgentSupport("NASTTestUserAgent");
                 var response = new GenerateRequestByType(factory).Submit(getContainerItemsRequest, authToken);
                 response.Dispose();
             }

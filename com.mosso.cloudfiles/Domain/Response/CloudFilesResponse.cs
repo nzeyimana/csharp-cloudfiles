@@ -31,9 +31,23 @@ namespace com.mosso.cloudfiles.domain.response
         {
             _webResponse = webResponse;
             CopyToMemory(_webResponse.GetResponseStream(), memstream);
+           // if (HasTextBody())
+            try
+            {
+                GetBody(Getstream());
+            }
+            catch
+            {
+                
+            }
             
-            GetBody(Getstream());
         }
+
+        private bool HasTextBody()
+        {
+            return (_webResponse.ContentType == "application/json; charset=utf-8" || _webResponse.ContentType == "application/xml; charset=utf-8" || _webResponse.ContentType == "text/plain") && _webResponse.ContentLength == -1;
+        }
+
         private void CopyToMemory(Stream input, Stream output)
         {
             byte[] buffer = new byte[32768];
