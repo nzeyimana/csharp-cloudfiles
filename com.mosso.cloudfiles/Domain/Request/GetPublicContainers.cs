@@ -20,7 +20,7 @@ namespace com.mosso.cloudfiles.domain.request
 
         public Uri CreateUri()
         {
-            return  new Uri(_cdnManagementUrl + "?enabled_only=true&format=text");
+            return  new Uri(_cdnManagementUrl + "?enabled_only=true");
         }
 
         public void Apply(ICloudFilesRequest request)
