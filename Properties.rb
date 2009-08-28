@@ -14,9 +14,9 @@ CORE_PROJECT_ORIGINAL_DLL_DIR = "com.mosso.cloudfiles/bin/#{COMPILE_TARGET}"
 INTEGRATION_TESTS_ORIGINAL_DLL_DIR = "com.mosso.cloudfiles.integration.tests/bin/#{COMPILE_TARGET}"
 UNIT_TESTS_ORIGINAL_DLL_DIR = "com.mosso.cloudfiles.unit.tests/bin/#{COMPILE_TARGET}"
 
-RELEASE_BUILD_NUMBER = "1.4.0.0"
+RELEASE_BUILD_NUMBER = "1.4.0.1"
 
-CLOUDFILES_BUILD_DIR = "C:/builds/#{RELEASE_BUILD_NUMBER}"
+CLOUDFILES_BUILD_DIR = "C:/builds/cloudfilescsharp"
 
 # BUILD CODE DIRECTORY
 BUILD_DIR = "#{CLOUDFILES_BUILD_DIR}/build"

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using com.mosso.cloudfiles.domain;
@@ -74,6 +75,7 @@ namespace com.mosso.cloudfiles
             if (userCredentials == null) throw new ArgumentNullException("userCredentials");
 
             UserCredentials = userCredentials;
+                      
             VerifyAuthentication();
         }
         /// <summary>

@@ -14,10 +14,10 @@ namespace com.mosso.cloudfiles.integration.tests.ConnectionSpecs.GetPublicContai
         {
             try
             {
-                connection.CreateContainer(Constants.CONTAINER_NAME);
+               connection.CreateContainer(Constants.CONTAINER_NAME);
                 Uri cdnUrl = connection.MarkContainerAsPublic(Constants.CONTAINER_NAME);
                 Assert.That(cdnUrl, Is.Not.Null);
-                Assert.That(cdnUrl.ToString().Length, Is.GreaterThan(0));
+               Assert.That(cdnUrl.ToString().Length, Is.GreaterThan(0));
 
                 List<string> containerList = connection.GetPublicContainers();
                 Assert.That(containerList, Is.Not.Null);
@@ -26,7 +26,7 @@ namespace com.mosso.cloudfiles.integration.tests.ConnectionSpecs.GetPublicContai
             }
             finally
             {
-                connection.MarkContainerAsPrivate(Constants.CONTAINER_NAME);
+              connection.MarkContainerAsPrivate(Constants.CONTAINER_NAME);
                 connection.DeleteContainer(Constants.CONTAINER_NAME);
             }
         }

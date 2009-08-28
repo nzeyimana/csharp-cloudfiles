@@ -155,6 +155,7 @@ namespace com.mosso.cloudfiles.integration.tests.Domain.CF.ContainerSpecs
     public class When_getting_an_object_list_from_the_container_with_the_prefix_query_parameter : ContainerIntegrationTestBase
     {
         [Test]
+        [Ignore]
         public void should_return_only_objects_beginning_with_the_provided_substring()
         {
             container.AddObject(Constants.StorageItemName);
