@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Asserts.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Domain\TestSpecMaker.cs" />
     <Compile Include="Utils\ContainerNameValidatorSpecs.cs" />
     <Compile Include="Domain\AccountSpecs.cs" />
     <Compile Include="Domain\CF\AccountSpecs.cs" />

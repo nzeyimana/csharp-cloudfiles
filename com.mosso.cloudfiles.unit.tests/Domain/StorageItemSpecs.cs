@@ -31,6 +31,7 @@ namespace com.mosso.cloudfiles.unit.tests.domain.StorageItemSpecs
         [Test]
         public void Should_have_storage_object_name()
         {
+            
             Assert.That(storageItem.ObjectName, Is.EqualTo(Constants.STORAGE_OBJECT_FILE_NAME));
         }
 

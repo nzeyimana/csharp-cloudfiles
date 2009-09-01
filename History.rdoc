@@ -1,5 +1,14 @@
 = History
 
+== v1.4.1.0 (2009-08-31)
+== New Features
+ * Increased test coverage using SpecMaker
+
+== v1.4.0.1 (2009-08-28)
+=== New Features
+=== Bugfixes
+ *  fixed bug in retrieving a public container list. 
+
 == v1.4.0.0 (2009-08-12)
 === New Features
  * added support for enabling/disabling access logs on public containers
