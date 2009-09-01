@@ -53,7 +53,9 @@
   <ItemGroup>
     <Compile Include="Asserts.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="Domain\TestSpecMaker.cs" />
+    <Compile Include="CustomMatchers\UriMatchers.cs" />
+    <Compile Include="CustomMatchers\WebHeaderMatchers.cs" />
+    <Compile Include="Domain\request\SetLoggingToContainerRequestSpec.cs" />
     <Compile Include="Utils\ContainerNameValidatorSpecs.cs" />
     <Compile Include="Domain\AccountSpecs.cs" />
     <Compile Include="Domain\CF\AccountSpecs.cs" />

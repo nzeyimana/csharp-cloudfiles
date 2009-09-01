@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace com.mosso.cloudfiles.integration.tests.Domain
 {
     [TestFixture]
-    public class CloudFileResponseSpec :TestBase
+    public class CloudFileResponseSpec : TestBase
     {
         [Test]
         public void should_be_able_to_return_stream_more_than_once()
@@ -24,10 +24,10 @@ namespace com.mosso.cloudfiles.integration.tests.Domain
                 var getStorageItem = new GetStorageItem(storageUrl, Constants.CONTAINER_NAME, Constants.StorageItemName);
 
                 getStorageItemResponse = new GenerateRequestByType().Submit(getStorageItem, authToken);
-                 stream = getStorageItemResponse.GetResponseStream();
-                 streamcopy = getStorageItemResponse.GetResponseStream();
+                stream = getStorageItemResponse.GetResponseStream();
+                streamcopy = getStorageItemResponse.GetResponseStream();
                 Assert.AreEqual(stream.Length, streamcopy.Length);
-                Assert.Greater(getStorageItemResponse.ContentLength , 0);
+                Assert.Greater(getStorageItemResponse.ContentLength, 0);
                 Assert.IsTrue(stream.CanRead);
                 Assert.IsTrue(streamcopy.CanRead);
             }

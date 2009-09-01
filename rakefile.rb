@@ -74,6 +74,10 @@ task :unit_test => :compile do
   sh "lib\\specmaker\\SpecMaker.exe #{UNIT_TESTS_DIR}\\com.mosso.cloudfiles.unit.tests.dll -report XML #{TEST_REPORTS_DIR}" 
 end
 
+desc "Console Runner For Specmaker"
+task :spec => :compile do
+	 sh "lib\\specmaker\\SpecMaker.exe #{UNIT_TESTS_DIR}\\com.mosso.cloudfiles.unit.tests.dll " 
+end
 
 desc "Runs integration tests"
 task :integration_test => :compile do
