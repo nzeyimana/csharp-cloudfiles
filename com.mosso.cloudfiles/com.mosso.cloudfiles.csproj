@@ -77,7 +77,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Domain\Request\AddLoggingToContainerRequest.cs" />
+    <Compile Include="Domain\Request\SetLoggingToContainerRequest.cs" />
     <Compile Include="Domain\Request\Interfaces\IAddToWebRequest.cs" />
     <Compile Include="Domain\Request\Interfaces\ICloudFilesRequest.cs" />
     <Compile Include="Domain\RequestFactory.cs" />

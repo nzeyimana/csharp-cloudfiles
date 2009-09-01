@@ -1,12 +1,32 @@
+using System;
 using System.IO;
 using com.mosso.cloudfiles.domain.request;
 using com.mosso.cloudfiles.domain.request.Interfaces;
 using com.mosso.cloudfiles.exceptions;
+using com.mosso.cloudfiles.unit.tests.CustomMatchers;
 using Moq;
 using NUnit.Framework;
+using SpecMaker.Core;
+using SpecMaker.Core.Matchers;
 
 namespace com.mosso.cloudfiles.unit.tests.Domain.request.PutStorageItemSpecs
 {
+    public class PutStorageItemSpec : BaseSpec
+    {
+        public void when_creating_uri()
+        {
+            should("start with storage url passed from constructor", RuleIs.Pending);
+            should("have container name in the middle", RuleIs.Pending);
+            should("have storage item at end", RuleIs.Pending);
+        }
+        public void when_creating_uri_and_storage_item_has_forward_slashes_at_the_beginning()
+        {
+            var memstream = new MemoryStream();
+            PutStorageItem item = new PutStorageItem("http://storeme", "itemcont", "/stuffhacks.txt", memstream);
+            Uri url = item.CreateUri();
+            should("remove all slashes", ()=> url.EndsWith("stuffhacks.txt"));
+        }
+    }
     [TestFixture]
     public class when_putting_a_storage_item_via_local_file_path_and_the_local_file_does_not_exist
     {
