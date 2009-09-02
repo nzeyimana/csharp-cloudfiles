@@ -26,67 +26,41 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.PutStorageItemSpecs
             Uri url = item.CreateUri();
             should("remove all slashes", ()=> url.EndsWith("stuffhacks.txt"));
         }
-    }
-    [TestFixture]
-    public class when_putting_a_storage_item_via_local_file_path_and_the_local_file_does_not_exist
-    {
-        [Test]
-        [ExpectedException(typeof(FileNotFoundException))]
-        public void should_throw_file_not_found_exception()
+        public void when_putting_a_storage_item_via_local_file_path_and_the_local_file_does_not_exist()
         {
             var mock = new Mock<ICloudFilesRequest>();
-            new PutStorageItem("a", "a", "a", "a").Apply(mock.Object);
+            should("throw FileNotFoundException", () => new PutStorageItem("a", "a", "a", "a").Apply(mock.Object), typeof(FileNotFoundException));
         }
-
-    }
-
-    [TestFixture]
-    public class when_putting_a_storage_item_via_local_file_path_and_the_container_name_exceeds_the_maximum_length
-    {
-        [Test]
-        [ExpectedException(typeof(ContainerNameException))]
-        public void should_throw_container_name_exception()
+        public void when_putting_a_storage_item_via_local_file_path_and_the_container_name_exceeds_the_maximum_length()
         {
-            new PutStorageItem("a", new string('a', Constants.MAX_CONTAINER_NAME_LENGTH + 1), "a", "a");
+            should("throw ContainerNameException", ()=> 
+                new PutStorageItem("a", new string('a', Constants.MAX_CONTAINER_NAME_LENGTH + 1), "a", "a")
+                ,typeof(ContainerNameException));
         }
-
-    }
-
-    [TestFixture]
-    public class when_putting_a_storage_item_via_stream_and_the_container_name_exceeds_the_maximum_length
-    {
-        [Test]
-        [ExpectedException(typeof(ContainerNameException))]
-        public void should_throw_container_name_exception()
+        public void when_putting_a_storage_item_via_stream_and_the_container_name_exceeds_the_maximum_length()
         {
             var s = new MemoryStream(new byte[0]);
-            new PutStorageItem("a", new string('a', Constants.MAX_CONTAINER_NAME_LENGTH + 1), "a", s);
+           should("throw ContainerNameException",()=>
+               new PutStorageItem("a", new string('a', Constants.MAX_CONTAINER_NAME_LENGTH + 1), "a", s)
+               ,typeof(ContainerNameException));
         }
-    }
-
-    [TestFixture]
-    public class when_putting_a_storage_item_via_local_file_path_and_the_storage_item_name_exceeds_the_maximum_length
-    {
-        [Test]
-        [ExpectedException(typeof(StorageItemNameException))]
-        public void should_throw_container_name_exception()
+        public void when_putting_a_storage_item_via_local_file_path_and_the_storage_item_name_exceeds_the_maximum_length()
         {
-            new PutStorageItem("a", "a", new string('a', Constants.MAX_OBJECT_NAME_LENGTH + 1), "a");
+            should("throw ContainerNameException",
+                   () => new PutStorageItem("a", "a", new string('a', Constants.MAX_OBJECT_NAME_LENGTH + 1), "a"),
+                 typeof(StorageItemNameException)  );
         }
-
-    }
-
-    [TestFixture]
-    public class when_putting_a_storage_item_via_stream_and_the_storage_item_name_exceeds_the_maximum_length
-    {
-        [Test]
-        [ExpectedException(typeof(StorageItemNameException))]
-        public void should_throw_container_name_exception()
+        public void when_putting_a_storage_item_via_stream_and_the_storage_item_name_exceeds_the_maximum_length()
         {
             var s = new MemoryStream(new byte[0]);
-            new PutStorageItem("a", "a", new string('a', Constants.MAX_OBJECT_NAME_LENGTH + 1), s);
+            should("throw ContainerNameException",()=>
+                new PutStorageItem("a", "a", new string('a', Constants.MAX_OBJECT_NAME_LENGTH + 1), s),
+                typeof(StorageItemNameException));
         }
     }
+
+
+  
 
     
 }
