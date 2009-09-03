@@ -4,8 +4,6 @@ using com.mosso.cloudfiles.domain.request;
 using com.mosso.cloudfiles.domain.request.Interfaces;
 using com.mosso.cloudfiles.unit.tests.CustomMatchers;
 using Moq;
-using NUnit.Framework;
-using NUnit.Framework.SyntaxHelpers;
 using SpecMaker.Core;
 
 
@@ -35,8 +33,8 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetContainerItemListSpe
             var uri = getContainerItemList.CreateUri();
             var _mockrequest = new Mock<ICloudFilesRequest>();
             getContainerItemList.Apply(_mockrequest.Object);
-            should("url should have_storage_url_at_beginning ", () => uri.StartsWith("http://storageurl"));
-            should("url should have_container name at the end ", () => uri.EndsWith("containername"));
+            should("url should have storage url at beginning ", () => uri.StartsWith("http://storageurl"));
+            should("url should have container name at the end ", () => uri.EndsWith("containername"));
             should("use HTTP GET method", () => _mockrequest.VerifySet(x => x.Method = "GET"));
         }
         public void when_getting_a_list_of_items_in_a_container_with_limit_query_parameter()
@@ -45,8 +43,8 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetContainerItemListSpe
             Uri uri;
             Mock<ICloudFilesRequest> _mockrequest = GetMockrequest(parameters, out uri);
 
-            should("url should have_storage_url_at_beginning ", () => uri.StartsWith("http://storageurl"));
-            should("url should have_container name followed by query string and limit at the end ",
+            should("url should have storage url at beginning ", () => uri.StartsWith("http://storageurl"));
+            should("url should have container name followed by query string and limit at the end ",
                 () => uri.EndsWith("containername?limit=2"));
             should("use HTTP GET method", () => _mockrequest.VerifySet(x => x.Method = "GET"));
         }
@@ -80,9 +78,27 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetContainerItemListSpe
             Mock<ICloudFilesRequest> _mockrequest = GetMockrequest(parameters, out uri);
 
             should("have url with storage url at beginning ", () => uri.StartsWith("http://storageurl"));
-            should("have url with container name followed by query string with prefix at the end ",
+            should("have url with container name followed by query string with path at the end ",
                 () => uri.EndsWith("containername?path=dir1/subdir2/"));
             should("use HTTP GET method", () => _mockrequest.VerifySet(x => x.Method = "GET"));
+        }
+        public void when_getting_a_list_of_items_in_a_container_with_more_than_one_query_parameter()
+        {
+            var parameters = new Dictionary<GetItemListParameters, string>
+                                 {
+                                     { GetItemListParameters.Limit, "2" },
+                                     { GetItemListParameters.Marker, "abc" },
+                                     { GetItemListParameters.Prefix, "a" },
+                                     { GetItemListParameters.Path, "dir1/subdir2/" }
+                                 };
+            Uri uri;
+            Mock<ICloudFilesRequest> _mockrequest = GetMockrequest(parameters, out uri);
+
+            should("have url with storage url at beginning ", () => uri.StartsWith("http://storageurl"));
+            should("have url with container name followed by query strings ",
+                () => uri.EndsWith("containername?limit=2&marker=abc&prefix=a&path=dir1/subdir2/"));
+            should("use HTTP GET method", () => _mockrequest.VerifySet(x => x.Method = "GET"));
+            
         }
         #region privates
         private Mock<ICloudFilesRequest> GetMockrequest(Dictionary<GetItemListParameters, string> parameters, out Uri uri)
@@ -96,42 +112,5 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetContainerItemListSpe
         #endregion
     }
 
-
-
-
-  
-
-    [TestFixture]
-    public class when_getting_a_list_of_items_in_a_container_with_more_than_one_query_parameter
-    {
-        private GetContainerItemList getContainerItemList;
-
-        [SetUp]
-        public void setup()
-        {
-            var parameters = new Dictionary<GetItemListParameters, string>
-                                 {
-                                     { GetItemListParameters.Limit, "2" },
-                                     { GetItemListParameters.Marker, "abc" },
-                                     { GetItemListParameters.Prefix, "a" },
-                                     { GetItemListParameters.Path, "dir1/subdir2/" }
-                                 };
-            getContainerItemList = new GetContainerItemList("http://storageurl", "containername", parameters);
-        }
-
-        [Test]
-        public void should_have_properly_formmated_request_url()
-        {
-            Assert.That(getContainerItemList.CreateUri().ToString(), Is.EqualTo("http://storageurl/containername?limit=2&marker=abc&prefix=a&path=dir1/subdir2/"));
-        }
-
-        [Test]
-        public void should_have_a_http_put_method()
-        {
-            Asserts.AssertMethod(getContainerItemList, "GET");
-
-        }
-
-
-    }
+    
 }
