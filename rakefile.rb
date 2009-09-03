@@ -71,7 +71,7 @@ task :unit_test => :compile do
   runner = NUnitRunner.new :compilemode => COMPILE_TARGET, :source => UNIT_TESTS_DIR, :results => TEST_REPORTS_DIR
   runner.executeTests ['com.mosso.cloudfiles.unit.tests']  
   puts "Running Specifications" 
-  sh "lib\\specmaker\\SpecMaker.exe #{UNIT_TESTS_DIR}\\com.mosso.cloudfiles.unit.tests.dll -report XML #{TEST_REPORTS_DIR}" 
+  sh "lib\\specmaker\\SpecMaker.exe #{UNIT_TESTS_DIR}\\com.mosso.cloudfiles.unit.tests.dll -report HTML #{TEST_REPORTS_DIR}" 
 end
 
 desc "Console Runner For Specmaker"

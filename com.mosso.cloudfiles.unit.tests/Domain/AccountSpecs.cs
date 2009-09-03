@@ -5,6 +5,7 @@ using NUnit.Framework.SyntaxHelpers;
 
 namespace com.mosso.cloudfiles.unit.tests.domain
 {
+    
     [TestFixture]
     public class When_checking_account
     {

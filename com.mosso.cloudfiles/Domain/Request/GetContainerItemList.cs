@@ -28,7 +28,7 @@ namespace com.mosso.cloudfiles.domain.request
         /// <param name="requestParameters">dictionary of parameter filters to place on the request url</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
         /// <exception cref="ContainerNameException">Thrown when the container name is invalid</exception>
-        public GetContainerItemList(string storageUrl,  string containerName,
+        public GetContainerItemList(string storageUrl,  string containerName, 
             Dictionary<GetItemListParameters, string> requestParameters)
         {
             _storageUrl = storageUrl;
