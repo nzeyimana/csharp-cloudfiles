@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Core, Version=1.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\castle\Castle.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Moq, Version=3.1.416.3, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\moq\Moq.dll</HintPath>
@@ -56,6 +60,8 @@
     <Compile Include="CustomMatchers\UriMatchers.cs" />
     <Compile Include="CustomMatchers\WebHeaderMatchers.cs" />
     <Compile Include="Domain\request\SetLoggingToContainerRequestSpec.cs" />
+    <Compile Include="Interception\ErrorLoggerSpec.cs" />
+    <Compile Include="Interception\NullStringPreventionSpec.cs" />
     <Compile Include="Utils\ContainerNameValidatorSpecs.cs" />
     <Compile Include="Domain\AccountSpecs.cs" />
     <Compile Include="Domain\CF\AccountSpecs.cs" />

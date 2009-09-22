@@ -42,24 +42,20 @@ namespace com.mosso.cloudfiles.domain.request
 
             _stringBuilder = new StringBuilder();
 
-            if (requestParameters != null && requestParameters.Count > 0)
-            {
-                foreach (GetItemListParameters param in requestParameters.Keys)
-                {
-                    var paramName = param.ToString().ToLower();
-                    if (param == GetItemListParameters.Limit)
-                        int.Parse(requestParameters[param]);
 
-                    if (_stringBuilder.Length > 0)
-                        _stringBuilder.Append("&");
-                    else
-                        _stringBuilder.AppendFormat("?");
-                    _stringBuilder.Append(paramName + "=" + requestParameters[param].Encode());
-                }
+            if (requestParameters == null || requestParameters.Count <= 0) return;
+            foreach (GetItemListParameters param in requestParameters.Keys)
+            {
+                var paramName = param.ToString().ToLower();
+                if (param == GetItemListParameters.Limit)
+                    int.Parse(requestParameters[param]);
+
+                if (_stringBuilder.Length > 0)
+                    _stringBuilder.Append("&");
+                else
+                    _stringBuilder.AppendFormat("?");
+                _stringBuilder.Append(paramName + "=" + requestParameters[param].Encode());
             }
-            
-          
-           
         }
 
         /// <summary>

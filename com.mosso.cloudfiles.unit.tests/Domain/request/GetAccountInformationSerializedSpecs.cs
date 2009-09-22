@@ -5,20 +5,21 @@ using com.mosso.cloudfiles.domain.request.Interfaces;
 using Moq;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
+using SpecMaker.Core;
 
 namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetAccountInformationSerializedSpecs
 {
-    [TestFixture]
-    public class when_getting_account_information_in_json_format_and_storage_url_is_null
+    public class GetAccountInformationSerializedSpecs: BaseSpec
     {
-        [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void should_throw_argument_null_exception()
+        public void when_getting_account_information_in_json_format_and_storage_url_is_null()
         {
-            new GetAccountInformationSerialized(null, Format.JSON);
+            should("throw ArgumentNullException", () => new GetAccountInformationSerialized(null, Format.JSON),
+                   typeof (ArgumentNullException));
         }
+     
+        
     }
-
+   
     [TestFixture]
     public class when_getting_account_information_in_json_format_and_storage_url_is_emptry_string
     {

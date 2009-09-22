@@ -86,80 +86,80 @@ See the class definitions for documentation on specific methods and operations.
 types are explicitly used in this example. The +var+ keyword could also be used and object/collection initializers could be used.  We are being explicit for example
 
 <b>Connect to CloudFiles</b>
-	UserCredentials userCredentials = new UserCredentials("username", "api key");
-	IConnection connection = new Connection(userCredentials);
+	var userCredentials = new UserCredentials("username", "api key");
+	var connection = new Connection(userCredentials);
 
 <b>Get the account information</b>
-	AccountInformation accountInformation = connection.GetAccountInformation();
+	var accountInformation = connection.GetAccountInformation();
 
 <b>Get the account information as JSON</b>
-	string jsonReturnValue = connection.GetAccountInformationJson();
+	var jsonReturnValue = connection.GetAccountInformationJson();
 
 <b>Get the account information as XML</b>
-	XmlDocument xmlReturnValue = connection.GetAccountInformationXml();
+	var xmlReturnValue = connection.GetAccountInformationXml();
 
 <b>Create new container</b>
 	connection.CreateContainer("container name");
 
 <b>Get container information</b>
-	Container container = connection.GetContainerInformation("container name");
+	var container = connection.GetContainerInformation("container name");
 
 <b>Get container information as JSON</b>
-	string jsonResponse = connection.GetContainerInformationJson("container name");
+	var jsonResponse = connection.GetContainerInformationJson("container name");
 
 <b>Get container information as XML</b>
-	XmlDocument xmlResponse = connection.GetContainerInformationXml("container name");
+	var xmlResponse = connection.GetContainerInformationXml("container name");
 
 <b>Put item in container with metadata</b>
-	Dictionary<string, string> metadata = new Dictionary<string, string>();
+	var metadata = new Dictionary{string, string}();
 	metadata.Add("key1", "value1");
 	metadata.Add("key2", "value2");
 	metadata.Add("key3", "value3");
 	connection.PutStorageItem("container name", "C:\Local\File\Path\file.txt", metadata);
 
 <b>Get all the containers for the account</b>
-	List<string> containers = connection.GetContainers();
+	var containers = connection.GetContainers();
 
 <b>Put item in container without metadata</b>
 	connection.PutStorageItem("container name", "C:\Local\File\Path\file.txt");
 
 <b>Put item in container from stream with metadata</b>
-	Dictionary{string, string} metadata = new Dictionary{string, string}();
+	var metadata = new Dictionary{string, string}();
 	metadata.Add("key1", "value1");
 	metadata.Add("key2", "value2");
 	metadata.Add("key3", "value3");
-	FileInfo file = new FileInfo("C:\Local\File\Path\file.txt");
+	var file = new FileInfo("C:\Local\File\Path\file.txt");
 	connection.PutStorageItem("container name", file.Open(FileMode.Open), "RemoteFileName.txt");
 
 <b>Put item in container from stream</b>
-	FileInfo file = new FileInfo("C:\Local\File\Path\file.txt");
+	var file = new FileInfo("C:\Local\File\Path\file.txt");
 	connection.PutStorageItem("container name", file.Open(FileMode.Open), "RemoteFileName.txt", metadata);
 
 <b>Make path explicitly with auto-creation of "directory" structure</b>
 	connection.MakePath("/dir1/dir2/dir3/dir4/file.txt");
 
 <b>List all the items in a container</b>
-	List<string> containerItemList = connection.GetContainerItemList("container name");
+	var containerItemList = connection.GetContainerItemList("container name");
 
 <b>Shortening the search results by using parameter dictionary</b>
-	Dictionary<GetItemListParameters, string> parameters = new Dictionary<GetItemListParameters, string>();
+	var parameters = new Dictionary{GetItemListParameters, string}();
 	parameters.Add(GetItemListParameters.Limit, 2);
 	parameters.Add(GetItemListParameters.Marker, 1);
 	parameters.Add(GetItemListParameters.Prefix, "a");
-	List<string> containerItemList = connection.GetContainerItemList("container name", parameters);
+	var containerItemList = connection.GetContainerItemList("container name", parameters);
 
 <b>Get item from container</b>
-	StorageItem storageItem = connection.GetStorageItem("container name", "RemoteStorageItem.txt");
+	var storageItem = connection.GetStorageItem("container name", "RemoteStorageItem.txt");
 
 <b>Get item from container with request Header fields</b>
-	Dictionary<RequestHeaderFields, string> requestHeaderFields = Dictionary<RequestHeaderFields, string>();
+	var requestHeaderFields = Dictionary{RequestHeaderFields, string}();
 	string dummy_etag = "5c66108b7543c6f16145e25df9849f7f";
 	requestHeaderFields.Add(RequestHeaderFields.IfMatch, dummy_etag);
 	requestHeaderFields.Add(RequestHeaderFields.IfNoneMatch, dummy_etag);
 	requestHeaderFields.Add(RequestHeaderFields.IfModifiedSince, DateTime.Now.AddDays(6).ToString());
 	requestHeaderFields.Add(RequestHeaderFields.IfUnmodifiedSince, DateTime.Now.AddDays(-6).ToString());
 	requestHeaderFields.Add(RequestHeaderFields.Range, "0-5");
-	StorageItem storageItem = connection.GetStorageItem("container name", "RemoteStorageItem.txt", requestHeaderFields);
+	var storageItem = connection.GetStorageItem("container name", "RemoteStorageItem.txt", requestHeaderFields);
 
 <b>Get item from container and put straight into local file</b>
 	StorageItem storageItem = connection.GetStorageItem("container name", "RemoteStorageItem.txt", "C:\Local\File\Path\file.txt");

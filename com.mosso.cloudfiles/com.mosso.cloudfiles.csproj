@@ -63,6 +63,22 @@
     <DocumentationFile>bin\Release\com.mosso.cloudfiles.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Core, Version=1.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\castle\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.DynamicProxy2, Version=2.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\castle\Castle.DynamicProxy2.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.MicroKernel, Version=2.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\castle\Castle.MicroKernel.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Windsor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\castle\Castle.Windsor.dll</HintPath>
+    </Reference>
     <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\log4net\log4net.dll</HintPath>
@@ -84,6 +100,8 @@
     <Compile Include="Domain\GenerateRequestByType.cs" />
     <Compile Include="Domain\WebRequestEngine.cs" />
     <Compile Include="Domain\Response\Interfaces\ICloudFilesResponse.cs" />
+    <Compile Include="Interception\ErrorLogging.cs" />
+    <Compile Include="Interception\NullStringPrevention.cs" />
     <Compile Include="Utils\ContainerNameValidator.cs" />
     <Compile Include="Domain\AccountInformation.cs" />
     <Compile Include="Domain\CF_Account.cs" />

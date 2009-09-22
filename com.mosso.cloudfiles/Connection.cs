@@ -58,26 +58,7 @@ namespace com.mosso.cloudfiles
         private bool retry;
         private List<ProgressCallback> callbackFuncs;
         private readonly GenerateRequestByType _requestfactory;
-        /// <summary>
-        /// Constructor available for testing responsefactories
-        /// </summary>
-        /// <param name="userCredentials"></param>
-        /// <param name="responseFactory"></param>
-        /// <param name="responseFactoryWithBody"></param>
-        public Connection(UserCredentials userCredentials, IResponseFactory responseFactory,
-            IResponseFactoryWithContentBody responseFactoryWithBody)
-        {
-            _requestfactory = new GenerateRequestByType();
-            callbackFuncs = new List<ProgressCallback>();
-            Log.EnsureInitialized();
-            AuthToken = "";
-            StorageUrl = "";
-            if (userCredentials == null) throw new ArgumentNullException("userCredentials");
 
-            UserCredentials = userCredentials;
-                      
-            VerifyAuthentication();
-        }
         /// <summary>
         /// A constructor used to create an instance of the Connection class
         /// </summary>
@@ -90,11 +71,20 @@ namespace com.mosso.cloudfiles
         /// <param name="userCredentials">An instance of the UserCredentials class, containing all pertinent authentication information</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
         public Connection(UserCredentials userCredentials)
-            : this(userCredentials, new ResponseFactory(), new ResponseFactoryWithContentBody())
         {
+            _requestfactory = new GenerateRequestByType();
+            callbackFuncs = new List<ProgressCallback>();
+            Log.EnsureInitialized();
+            AuthToken = "";
+            StorageUrl = "";
+            if (userCredentials == null) throw new ArgumentNullException("userCredentials");
 
+            UserCredentials = userCredentials;
+                      
+            VerifyAuthentication();
         }
-
+    
+      
         protected virtual void VerifyAuthentication()
         {
             if (!IsAuthenticated())
