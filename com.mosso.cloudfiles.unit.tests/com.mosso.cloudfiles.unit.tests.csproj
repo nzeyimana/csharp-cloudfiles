@@ -60,8 +60,6 @@
     <Compile Include="CustomMatchers\UriMatchers.cs" />
     <Compile Include="CustomMatchers\WebHeaderMatchers.cs" />
     <Compile Include="Domain\request\SetLoggingToContainerRequestSpec.cs" />
-    <Compile Include="Interception\ErrorLoggerSpec.cs" />
-    <Compile Include="Interception\NullStringPreventionSpec.cs" />
     <Compile Include="Utils\ContainerNameValidatorSpecs.cs" />
     <Compile Include="Domain\AccountSpecs.cs" />
     <Compile Include="Domain\CF\AccountSpecs.cs" />
@@ -112,6 +110,9 @@
       <Project>{A4EC4FAB-EE91-4DE7-B21D-CBABFA05B363}</Project>
       <Name>com.mosso.cloudfiles</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Interception\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
