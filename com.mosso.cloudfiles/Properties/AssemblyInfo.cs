@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Security;
 
-[assembly: AssemblyVersion("1.4.1.0")]
+[assembly: AssemblyVersion("1.4.1.1")]
 [assembly: AssemblyDescription("C#.NET API for Rackspace Cloud Files Cloud Storage")]
 
 [assembly: AssemblyCompany("Rackspace Managed Hosting")]

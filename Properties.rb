@@ -1,4 +1,4 @@
-INTEGRATION_TESTS_CONFIG_FILE = "com.mosso.cloudfiles.integration.tests/obj/Release/Credentials.config"
+INTEGRATION_TESTS_CONFIG_FILE = "C:/builds/cloudfilescsharp/build/release/IntegrationTestsCredentials.config"
 COMPILE_TARGET = "release"
 PRODUCT = "csharp-floudfiles"
 COPYRIGHT = "Copyright (c) 2008 2009, Rackspace Managed Hosting.  All Rights Reserved";
@@ -14,7 +14,7 @@ CORE_PROJECT_ORIGINAL_DLL_DIR = "com.mosso.cloudfiles/bin/#{COMPILE_TARGET}"
 INTEGRATION_TESTS_ORIGINAL_DLL_DIR = "com.mosso.cloudfiles.integration.tests/bin/#{COMPILE_TARGET}"
 UNIT_TESTS_ORIGINAL_DLL_DIR = "com.mosso.cloudfiles.unit.tests/bin/#{COMPILE_TARGET}"
 
-RELEASE_BUILD_NUMBER = "1.4.1.0"
+RELEASE_BUILD_NUMBER = "1.4.1.1"
 
 CLOUDFILES_BUILD_DIR = "C:/builds/cloudfilescsharp"
 
