@@ -1,11 +1,11 @@
 using System.Reflection;
 using System.Security;
 
-[assembly: AssemblyVersion("1.4.1.1")]
+[assembly: AssemblyVersion("1.4.1.2")]
 [assembly: AssemblyDescription("C#.NET API for Rackspace Cloud Files Cloud Storage")]
 
 [assembly: AssemblyCompany("Rackspace Managed Hosting")]
-[assembly: AssemblyInformationalVersion("1.4.1.0")]
+[assembly: AssemblyInformationalVersion("1.4.1.2")]
 [assembly: AssemblyProduct("csharp-floudfiles")]
 [assembly: AllowPartiallyTrustedCallers]
 

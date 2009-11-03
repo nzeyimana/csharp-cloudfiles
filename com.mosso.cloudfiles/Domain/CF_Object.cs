@@ -20,16 +20,16 @@ namespace com.mosso.cloudfiles.domain
 
     public class CF_Object : IObject
     {
-        private readonly AbstractConnection connection;
+        private readonly IConnection connection;
         protected Uri publicUrl;
         protected long contentLength;
         protected string etag;
         protected string contentType;
         protected Dictionary<string, string> metadata;
 
-        public CF_Object(AbstractConnection connection, string objectName) : this(connection, objectName, new Dictionary<string, string>()){}
+        public CF_Object(IConnection connection, string objectName) : this(connection, objectName, new Dictionary<string, string>()){}
 
-        public CF_Object(AbstractConnection connection, string objectName, Dictionary<string, string> metadata)
+        public CF_Object(IConnection connection, string objectName, Dictionary<string, string> metadata)
         {
             this.metadata = metadata;
             this.connection = connection;
@@ -86,7 +86,7 @@ namespace com.mosso.cloudfiles.domain
         protected virtual void CloudFilesHeadObject()
         {
             var @objectInformation = connection.GetStorageItemInformation(ContainerName, Name);
-            contentLength = long.Parse(@objectInformation.ContentLength);
+            contentLength =String.IsNullOrEmpty(@objectInformation.ContentLength) ? 0 : long.Parse(@objectInformation.ContentLength);
             contentType = @objectInformation.ContentType;
             etag = @objectInformation.ETag;
             metadata = @objectInformation.Metadata;

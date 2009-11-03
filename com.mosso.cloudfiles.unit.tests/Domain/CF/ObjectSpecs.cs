@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Net;
 using com.mosso.cloudfiles.domain;
+using Moq;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
 
@@ -41,7 +44,31 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.CF.ObjectSpecs
             Assert.That(@object.Metadata.Count, Is.EqualTo(0));
         }
     }
+    [TestFixture]
+    public class When_getting_information_on_an_object_and_content_length_is_null
+    {
+        private CF_Object cfnet;
 
+        [SetUp]
+        public void setup()
+        {
+            var mockobj = new Mock<IConnection>();
+            mockobj.Setup(x => x.GetStorageItemInformation(It.IsAny<string>(), "storage")).Returns(
+                new StorageItemInformation(new WebHeaderCollection()
+                                               {
+                                                   
+                                               }));
+
+             cfnet = new CF_Object(mockobj.Object, "storage");
+           
+        }
+
+        [Test]
+        public void should_be_zero()
+        {
+            Assert.AreEqual(0,cfnet.ContentLength);
+        }
+    }
     [TestFixture]
     public class When_setting_an_objects_meta_data_on_instantiation
     {
