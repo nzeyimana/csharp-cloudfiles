@@ -6,6 +6,7 @@ using System.Collections.Generic;
 namespace com.mosso.cloudfiles.integration.tests.ConnectionSpecs.GetPublicContainersSpecs
 {
     [TestFixture]
+    [Ignore("CDN not under our control must rethink this entirely, odd bugs crop up that are not in our control")]
     public class When_requesting_a_list_of_public_containers_and_there_are_public_containers : TestBase
     {
 
@@ -14,7 +15,7 @@ namespace com.mosso.cloudfiles.integration.tests.ConnectionSpecs.GetPublicContai
         {
             try
             {
-               connection.CreateContainer(Constants.CONTAINER_NAME);
+                connection.CreateContainer(Constants.CONTAINER_NAME);
                 Uri cdnUrl = connection.MarkContainerAsPublic(Constants.CONTAINER_NAME);
                 Assert.That(cdnUrl, Is.Not.Null);
                Assert.That(cdnUrl.ToString().Length, Is.GreaterThan(0));

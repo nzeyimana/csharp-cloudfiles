@@ -17,7 +17,7 @@ namespace com.mosso.cloudfiles
     /// <summary>
     /// The interface dictating the required methods for all implementing classes
     /// </summary>
-    public abstract class AbstractConnection
+    public abstract class AbstractConnection : IConnection
     {
         public abstract AccountInformation GetAccountInformation();
         public abstract string GetAccountInformationJson();
@@ -69,7 +69,7 @@ namespace com.mosso.cloudfiles
         /// <summary>
         /// The storage url used to interact with cloud files
         /// </summary>
-        public string StorageUrl { get; protected set; }
+        public string StorageUrl { get;  set; }
         /// <summary>
         /// the public cdn url for the authenticated user
         /// </summary>
@@ -78,7 +78,7 @@ namespace com.mosso.cloudfiles
         /// <summary>
         /// the session based token used to ensure the user was authenticated
         /// </summary>
-        public string AuthToken { get; protected set; }
+        public string AuthToken { get;  set; }
 
         /// <summary>
         /// The user credentials used to authenticate against cloud files

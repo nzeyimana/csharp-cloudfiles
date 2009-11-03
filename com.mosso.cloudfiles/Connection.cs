@@ -7,12 +7,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
 using com.mosso.cloudfiles.domain;
 using com.mosso.cloudfiles.domain.request;
-using com.mosso.cloudfiles.domain.response;
 using com.mosso.cloudfiles.domain.response.Interfaces;
 using com.mosso.cloudfiles.exceptions;
 using com.mosso.cloudfiles.utils;
@@ -1251,7 +1249,7 @@ namespace com.mosso.cloudfiles
 
 
                 var metadata = GetMetadata(getStorageItemResponse);
-                var storageItem = new StorageItem(storageItemName, metadata, getStorageItemResponse.ContentType, getStorageItemResponse.GetResponseStream(), getStorageItemResponse.ContentLength);
+                var storageItem = new StorageItem(storageItemName, metadata, getStorageItemResponse.ContentType, getStorageItemResponse.GetResponseStream(), getStorageItemResponse.ContentLength, getStorageItemResponse.LastModified);
                 //                getStorageItemResponse.Dispose();
                 return storageItem;
             }

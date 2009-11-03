@@ -151,6 +151,11 @@ namespace com.mosso.cloudfiles.domain.response
             get { return _webResponse.ContentLength; }
         }
 
+        public DateTime LastModified
+        {
+            get { return _webResponse.LastModified; }
+        }
+
         public Stream GetResponseStream()
         {
             

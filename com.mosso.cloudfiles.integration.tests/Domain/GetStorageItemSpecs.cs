@@ -222,6 +222,35 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetStorageItemSpecs
 
                 Assert.That(exceptionWasThrown, Is.True);
             }
+
+        }
+        [Test]
+        public void should_return_item_with_last_modified_date_within_a_minute_of_object_creation()
+        {
+
+
+            requestHeaderFields = new Dictionary<RequestHeaderFields, string>();
+            requestHeaderFields.Add(RequestHeaderFields.IfModifiedSince, pastDateTime.ToString());
+
+            using (TestHelper testHelper = new TestHelper(authToken, storageUrl))
+            {
+                ICloudFilesResponse getStorageItemResponse = null;
+                try
+                {
+                    testHelper.PutItemInContainer();
+                    var getStorageItem = new GetStorageItem(storageUrl, Constants.CONTAINER_NAME, Constants.StorageItemName, requestHeaderFields);
+
+                    getStorageItemResponse = new GenerateRequestByType().Submit(getStorageItem, authToken);
+                    Assert.That(getStorageItemResponse.Status, Is.EqualTo(HttpStatusCode.OK));
+                    Assert.That(getStorageItemResponse.LastModified, Is.AtLeast(DateTime.Now.AddMinutes(-1)));
+                    Assert.That(getStorageItemResponse.LastModified, Is.AtMost(DateTime.Now.AddMinutes(2)));
+                }
+                finally
+                {
+                    if (getStorageItemResponse != null) getStorageItemResponse.Dispose();
+                    testHelper.DeleteItemFromContainer();
+                }
+            }
         }
 
         [Test]

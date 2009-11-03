@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using com.mosso.cloudfiles.domain;
 using NUnit.Framework;
@@ -19,7 +20,7 @@ namespace com.mosso.cloudfiles.unit.tests.domain.StorageItemSpecs
                                                           {Constants.META_KEY2, Constants.META_VALUE2}
                                                       };
 
-            storageItem = new StorageItem(Constants.STORAGE_OBJECT_FILE_NAME, metadata, "text/plain", 0);
+            storageItem = new StorageItem(Constants.STORAGE_OBJECT_FILE_NAME, metadata, "text/plain", 0, new DateTime());
         }
 
         [TearDown]
@@ -46,7 +47,11 @@ namespace com.mosso.cloudfiles.unit.tests.domain.StorageItemSpecs
         {
             Assert.That(storageItem.ObjectName, Is.Not.Null);
         }
-
+        [Test]
+        public void Should_have_last_modified_time()
+        {
+            Assert.That(storageItem.LastModified, Is.Not.Null);
+        }
         [Test]
         public void Should_have_meta_tags()
         {

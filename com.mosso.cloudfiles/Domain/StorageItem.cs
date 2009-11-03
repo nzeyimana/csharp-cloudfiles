@@ -19,6 +19,9 @@ namespace com.mosso.cloudfiles.domain
         private readonly string objectContentType;
         private readonly Stream objectStream;
         private readonly long contentLength;
+        private readonly DateTime lastModified;
+
+      
 
         /// <summary>
         /// 
@@ -27,9 +30,10 @@ namespace com.mosso.cloudfiles.domain
         /// <param name="metadata"></param>
         /// <param name="objectContentType"></param>
         /// <param name="contentLength"></param>
-        public StorageItem(string objectName, Dictionary<string, string> metadata, string objectContentType, long contentLength)
+        public StorageItem(string objectName, Dictionary<string, string> metadata, string objectContentType, long contentLength, DateTime lastModified)
         {
             this.objectName = objectName;
+            this.lastModified = lastModified;
             this.contentLength = contentLength;
             this.objectContentType = objectContentType;
             this.metadata = metadata;
@@ -43,9 +47,10 @@ namespace com.mosso.cloudfiles.domain
         /// <param name="objectContentType"></param>
         /// <param name="contentStream"></param>
         /// <param name="contentLength"></param>
-        public StorageItem(string objectName, Dictionary<string, string> metadata, string objectContentType, Stream contentStream, long contentLength)
+        public StorageItem(string objectName, Dictionary<string, string> metadata, string objectContentType, Stream contentStream, long contentLength, DateTime lastModified)
         {
             this.objectName = objectName;
+            this.lastModified = lastModified;
             this.contentLength = contentLength;
             this.objectContentType = objectContentType;
             this.metadata = metadata;
@@ -101,6 +106,10 @@ namespace com.mosso.cloudfiles.domain
             get { return objectName; }
         }
 
+        public DateTime LastModified
+        {
+            get { return lastModified; }
+        }
 
     }
 }

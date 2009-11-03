@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -23,6 +24,7 @@ namespace com.mosso.cloudfiles.domain.response.Interfaces
         string ContentType{ get; }
         string ETag { get; set; }
         long ContentLength { get; }
+        DateTime LastModified { get; }
         Stream GetResponseStream();
         void Dispose();
         event Connection.ProgressCallback Progress;

@@ -100,6 +100,7 @@
     <Compile Include="Domain\GenerateRequestByType.cs" />
     <Compile Include="Domain\WebRequestEngine.cs" />
     <Compile Include="Domain\Response\Interfaces\ICloudFilesResponse.cs" />
+    <Compile Include="IConnection.cs" />
     <Compile Include="Utils\ContainerNameValidator.cs" />
     <Compile Include="Domain\AccountInformation.cs" />
     <Compile Include="Domain\CF_Account.cs" />
