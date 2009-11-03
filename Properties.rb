@@ -1,4 +1,4 @@
-INTEGRATION_TESTS_CONFIG_FILE = "com.mosso.cloudfiles.integration.tests/Credentials.config"
+INTEGRATION_TESTS_CONFIG_FILE = "com.mosso.cloudfiles.integration.tests/obj/Debug/Credentials.config"
 COMPILE_TARGET = "release"
 PRODUCT = "csharp-floudfiles"
 COPYRIGHT = "Copyright (c) 2008 2009, Rackspace Managed Hosting.  All Rights Reserved";
