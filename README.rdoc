@@ -136,7 +136,7 @@ types are explicitly used in this example. The +var+ keyword could also be used 
 	connection.PutStorageItem("container name", file.Open(FileMode.Open), "RemoteFileName.txt", metadata);
 
 <b>Make path explicitly with auto-creation of "directory" structure</b>
-	connection.MakePath("/dir1/dir2/dir3/dir4/file.txt");
+	connection.MakePath("/dir1/dir2/dir3/dir4");
 
 <b>List all the items in a container</b>
 	var containerItemList = connection.GetContainerItemList("container name");

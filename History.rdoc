@@ -1,4 +1,11 @@
 = History
+== v1.4.1.2 (2009-11-3)
+== Bugfixes
+ * Fixed bug with null ContentLength on CF_Object
+ * Corrected MakePath to only worry about making directory objects. 
+ NOTICE: MakePath now will NOT ignore '.' in the path.  This could be 
+ a breaking change to your existing code, now directory objects will be created regardless.
+ * Set content type on directory objects to "application/directory".
 
 == v1.4.1.0 (2009-08-31)
 == New Features

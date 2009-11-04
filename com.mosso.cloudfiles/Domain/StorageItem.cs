@@ -30,6 +30,7 @@ namespace com.mosso.cloudfiles.domain
         /// <param name="metadata"></param>
         /// <param name="objectContentType"></param>
         /// <param name="contentLength"></param>
+        /// <param name="lastModified"></param>
         public StorageItem(string objectName, Dictionary<string, string> metadata, string objectContentType, long contentLength, DateTime lastModified)
         {
             this.objectName = objectName;
@@ -47,6 +48,7 @@ namespace com.mosso.cloudfiles.domain
         /// <param name="objectContentType"></param>
         /// <param name="contentStream"></param>
         /// <param name="contentLength"></param>
+        /// <param name="lastModified"></param>
         public StorageItem(string objectName, Dictionary<string, string> metadata, string objectContentType, Stream contentStream, long contentLength, DateTime lastModified)
         {
             this.objectName = objectName;

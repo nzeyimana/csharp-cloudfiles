@@ -411,12 +411,11 @@ namespace com.mosso.cloudfiles
         /// <code>
         /// UserCredentials userCredentials = new UserCredentials("username", "api key");
         /// IConnection connection = new Connection(userCredentials);
-        /// connection.MakePath("/dir1/dir2/dir3/dir4/file.txt");
+        /// connection.MakePath("containername", "/dir1/dir2/dir3/dir4");
         /// </code>
         /// </example>
         /// <param name="containerName">The container to create the directory objects in</param>
         /// <param name="path">The path of directory objects to create</param>
-        /// <returns>An instance of List, containing the names of the storage objects in the give container</returns>
         public override void MakePath(string containerName, string path)
         {
             try
@@ -432,10 +431,9 @@ namespace com.mosso.cloudfiles
                 foreach (var item in directories)
                 {
                     if (string.IsNullOrEmpty(item)) continue;
-                    if (item.IndexOf('.') > 0) continue;
                     if (!firstItem) directory += "/";
                     directory += item.Encode();
-                    PutStorageItem(containerName, new MemoryStream(new byte[0]), directory);
+                    MakeStorageDirectory(containerName, directory);
                     firstItem = false;
                 }
             }
@@ -449,6 +447,41 @@ namespace com.mosso.cloudfiles
             }
         }
 
+        private void MakeStorageDirectory(string containerName, string remoteobjname )
+        {
+            if (string.IsNullOrEmpty(containerName) ||
+                string.IsNullOrEmpty(remoteobjname))
+                throw new ArgumentNullException();
+
+            Log.Info(this, "Putting storage item "
+                + remoteobjname + " with metadata into container '"
+                + containerName + "' for user "
+                + UserCredentials.Username);
+
+            try
+            {
+
+                var makedirectory = new PutStorageDirectory(StorageUrl, containerName, remoteobjname);
+                _requestfactory.Submit(makedirectory, AuthToken, UserCredentials.ProxyCredentials);
+            }
+            catch (WebException webException)
+            {
+                Log.Error(this, "Error putting storage item "
+                    + remoteobjname + " with metadata into container '"
+                    + containerName + "' for user "
+                    + UserCredentials.Username, webException);
+
+                var webResponse = (HttpWebResponse)webException.Response;
+                if (webResponse == null) throw;
+                if (webResponse.StatusCode == HttpStatusCode.BadRequest)
+                    throw new ContainerNotFoundException("The requested container does not exist");
+                if (webResponse.StatusCode == HttpStatusCode.PreconditionFailed)
+                    throw new PreconditionFailedException(webException.Message);
+
+                throw;
+            }
+
+        }
         /// <summary>
         /// This method retrieves the contents of a container
         /// </summary>
@@ -1860,9 +1893,10 @@ namespace com.mosso.cloudfiles
         /// <example>
         /// UserCredentials userCredentials = new UserCredentials("username", "api key");
         /// IConnection connection = new Connection(userCredentials);
-        /// connection.SetLoggingOnPublicContainer("container name")
+        /// connection.SetLoggingOnPublicContainer("container name", true)
         /// </example>
         /// <param name="publiccontainer">must be an already existig public container</param>
+        /// <param name="loggingenabled">enabled makes cdn logging available</param>
         public override void SetLoggingOnPublicContainer(string publiccontainer, bool loggingenabled)
         {
             if (string.IsNullOrEmpty(publiccontainer))

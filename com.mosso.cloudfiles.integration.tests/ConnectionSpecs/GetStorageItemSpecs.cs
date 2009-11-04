@@ -178,7 +178,7 @@ namespace com.mosso.cloudfiles.integration.tests.ConnectionSpecs.GetStorageItemS
 
                 Thread.Sleep(3000);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 connection.DeleteStorageItem(Constants.CONTAINER_NAME, Constants.StorageItemName);
                 connection.DeleteContainer(Constants.CONTAINER_NAME);

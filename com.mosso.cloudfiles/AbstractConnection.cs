@@ -91,9 +91,10 @@ namespace com.mosso.cloudfiles
         /// <example>
         /// UserCredentials userCredentials = new UserCredentials("username", "api key");
         /// IConnection connection = new Connection(userCredentials);
-        /// connection.SetLoggingOnPublicContainer("container name")
+        /// connection.SetLoggingOnPublicContainer("container name",true)
         /// </example>
         /// <param name="publiccontainer">must be an already existig public container</param>
+        /// <param name="loggingenabled">enabled makes cdn logging available</param>
         public abstract void SetLoggingOnPublicContainer(string publiccontainer, bool loggingenabled);
 
         }
