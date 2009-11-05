@@ -87,7 +87,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetAuthenticationSpecs
         [Test]
         public void should_have_properly_formmated_auth_url()
         {
-            Assert.That(getAuthentication.CreateUri().ToString(), Is.EqualTo("http://authurl/cloudversion/cloudaccountname/auth"));
+            Assert.That(getAuthentication.CreateUri().ToString(), Is.EqualTo("http://authurl//cloudversion/cloudaccountname/auth"));
         }
 
         [Test]
@@ -132,7 +132,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetAuthenticationSpecs
             var headers = new WebHeaderCollection();
             _mockrequest.SetupGet(x => x.Headers).Returns(headers);
             getAuthentication.Apply(_mockrequest.Object);
-            Assert.That(getAuthentication.CreateUri().AbsoluteUri, Is.EqualTo("http://tempuri/v%201/account%20name/auth"));
+            Assert.That(getAuthentication.CreateUri().AbsoluteUri, Is.EqualTo("http://tempuri//v%201/account%20name/auth"));
             Assert.That(headers[utils.Constants.X_AUTH_USER], Is.EqualTo("user%20name"));
             Assert.That(headers[utils.Constants.X_AUTH_KEY], Is.EqualTo("pass%20word"));
         }
