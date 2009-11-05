@@ -27,7 +27,7 @@ namespace com.mosso.cloudfiles.domain.request
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
         /// <exception cref="ContainerNameException">Thrown when the container name is invalid</exception>
         /// <exception cref="StorageItemNameException">Thrown when the object name is invalid</exception>
-        public GetStorageItemInformation(string storageUrl,string containerName, string storageItemName)
+        public GetStorageItemInformation(string storageUrl, string containerName, string storageItemName)
         {
            
             if (string.IsNullOrEmpty(storageUrl)

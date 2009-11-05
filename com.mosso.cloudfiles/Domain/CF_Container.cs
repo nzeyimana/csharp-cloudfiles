@@ -31,12 +31,12 @@ namespace com.mosso.cloudfiles.domain
 
     public class CF_Container : IContainer
     {
-        private readonly AbstractConnection connection;
+        private readonly IConnection connection;
         protected List<IObject> objects;
         protected int objectCount;
         protected long bytesUsed;
 
-        public CF_Container(AbstractConnection connection, string containerName)
+        public CF_Container(IConnection connection, string containerName)
         {
             objects = new List<IObject>();
             Name = containerName;
@@ -206,14 +206,22 @@ namespace com.mosso.cloudfiles.domain
         {
             try
             {
-                var @object = connection.GetStorageItem(Name, objectName);
-                @object.Dispose();
+                var @object = connection.GetStorageItemInformation(Name, objectName);
                 return @object != null;
             }
-            catch (StorageItemNotFoundException)
+            catch (ContainerNameException)
             {
                 return false;
             }
+			catch(StorageItemNameException)
+			{
+				return false;	
+			}
+			catch(StorageItemNotFoundException)
+			{
+				return false;
+			}
+			
         }
 
         protected virtual void CloudFilesMarkContainerPublic()

@@ -14,14 +14,14 @@ namespace com.mosso.cloudfiles.integration.tests.domain.GetContainerItemListSpec
     [TestFixture]
     public class When_retrieving_a_list_items_from_specific_container : TestBase
     {
-        private IRequestFactory GetMockRequestFactory(string useragent,Uri uri)
-        {
-            var handrequest = new CloudFilesRequest((HttpWebRequest)WebRequest.Create(uri)) {UserAgent = useragent};
-            var mock = new Mock<IRequestFactory>();
-            mock.Setup(x => x.Create(uri)).Returns(handrequest);
-            IRequestFactory factory = mock.Object;
-            return factory;
-        }
+//        private IRequestFactory GetMockRequestFactory(string useragent,Uri uri)
+//        {
+//            var handrequest = new CloudFilesRequest((HttpWebRequest)WebRequest.Create(uri)) {UserAgent = useragent};
+//            var mock = new Mock<IRequestFactory>();
+//            mock.Setup(x => x.Create(uri)).Returns(handrequest);
+//            IRequestFactory factory = mock.Object;
+//            return factory;
+//        }
         [Test]
         public void should_return_no_content_status_when_container_is_empty()
         {

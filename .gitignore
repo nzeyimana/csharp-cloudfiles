@@ -8,6 +8,9 @@ _ReSharper.*
 *.cache
 *~
 *.swp
+*.userprefs
+test-results
+*.pidb
 /Build
 NDependOut
 Credentials.config

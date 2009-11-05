@@ -13,11 +13,7 @@ namespace com.mosso.cloudfiles.integration.tests.ConnectionSpecs
             {
                 connection.CreateContainer(Constants.CONTAINER_NAME);
                 connection.SetLoggingOnPublicContainer(Constants.CONTAINER_NAME, true);
-                var container = connection.GetContainers();
-            }
-            catch (Exception ex)
-            {
-                var ex1 = ex;
+                 connection.GetContainers();
             }
             finally
             {

@@ -5,6 +5,8 @@ using com.mosso.cloudfiles.exceptions;
 using NUnit.Framework;
 using NUnit.Framework.SyntaxHelpers;
 using System.Collections.Generic;
+using Moq;
+using System.Net;
 
 namespace com.mosso.cloudfiles.unit.tests.Domain.CF.ContainerSpecs
 {
@@ -246,7 +248,101 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.CF.ContainerSpecs
             Assert.That(container.XML.InnerXml, Is.EqualTo(expectedXml));
         }
     }
-
+	public class BaseHeadContext
+	{
+		protected Mock<IConnection> mockconnection;
+		protected string fakecontainer;
+		
+		protected void context()
+		{
+		    fakecontainer = "fakecontainer";
+			mockconnection = new Mock<IConnection>();
+			
+		}
+		protected bool objectInContainerExists()
+		{
+			var container =new CF_Container(mockconnection.Object, fakecontainer);
+			container.AddObject("object");
+			return container.ObjectExists("object");
+			 
+		}
+	}
+	[TestFixture]
+	public class When_geting_head_object:BaseHeadContext
+	{
+		bool hasobject;
+		[SetUp]
+		public void setup()
+		{
+			base.context();
+			mockconnection.Setup(x=>x.GetStorageItemInformation(It.IsAny<string>(), It.IsAny<string>())).
+				Returns(new StorageItemInformation(new WebHeaderCollection()));
+			hasobject = objectInContainerExists();
+		}
+		[Test]
+		public void should_call_get_storage_item_information()
+		{
+			mockconnection.Verify(conn=>conn.GetStorageItemInformation(fakecontainer,"object"));
+		}
+		[Test]
+		public void should_have_object_in_container()
+		{
+			Assert.IsTrue(hasobject);
+		}
+	}
+	[TestFixture]
+	public class When_getting_head_object_and_there_is_a_ContainerNameException:BaseHeadContext
+	{
+	
+		[SetUp]
+		public void setup()
+		{
+			base.context();	
+			mockconnection.Setup(x=>x.GetStorageItemInformation(fakecontainer, "object")).Throws<ContainerNameException>();
+			
+		}
+		[Test]
+		public void should_not_have_object_in_container()
+		{
+			Assert.IsFalse(objectInContainerExists());
+		}
+	}
+	[TestFixture]
+	public class When_getting_head_object_and_there_is_a_StorageItemNameException:BaseHeadContext
+	{
+		[SetUp]
+		public void setup()
+		{
+			base.context();	
+			mockconnection.Setup(x=>x.GetStorageItemInformation(fakecontainer, "object")).Throws<StorageItemNameException>();
+			
+		}
+		[Test]
+		public void should_return_false()
+		{
+		 
+			Assert.IsFalse(objectInContainerExists());
+		}
+		
+	}
+	[TestFixture]
+	public class When_getting_head_object_and_there_is_a_StorageItemNotFoundException:BaseHeadContext
+	{
+		[SetUp]
+		public void setup()
+		{
+			base.context();	
+			mockconnection.Setup(x=>x.GetStorageItemInformation(fakecontainer, "object")).Throws<StorageItemNotFoundException>();
+			
+		}
+		[Test]
+		public void should_return_false()
+		{
+		 
+			Assert.IsFalse(objectInContainerExists());
+		}
+		
+	}
     public class MockCFContainer : CF_Container
     {
 
