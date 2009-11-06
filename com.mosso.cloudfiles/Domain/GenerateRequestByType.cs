@@ -18,34 +18,27 @@ namespace com.mosso.cloudfiles.domain.request
         {
             _factory = factory;
         }
-        private ICloudFilesRequest commonSubmit(IAddToWebRequest requesttype)
+        private ICloudFilesResponse commonSubmit(IAddToWebRequest requesttype, Func<ICloudFilesRequest> requestfactory, string authtoken)
         {
-            var cfrequest = _factory.Create(requesttype.CreateUri());
+            var cfrequest = requestfactory.Invoke();
+			if(authtoken!=String.Empty)
+				 cfrequest.Headers.Add(Constants.X_AUTH_TOKEN, HttpUtility.UrlEncode(authtoken));
             requesttype.Apply(cfrequest);
-            return cfrequest;
+           	var response = new ResponseFactory().Create(cfrequest);
+           	return response;
         }
         public ICloudFilesResponse Submit (IAddToWebRequest requesttype,  string authtoken)
         {
-            var cfrequest = commonSubmit(requesttype);
-            cfrequest.Headers.Add(Constants.X_AUTH_TOKEN, HttpUtility.UrlEncode(authtoken));
-            var response = new ResponseFactory().Create(cfrequest);
-            return response;
+			return commonSubmit(requesttype, ()=>_factory.Create(requesttype.CreateUri()), authtoken);
         }
         public ICloudFilesResponse Submit(IAddToWebRequest requesttype)
         {
-            var response = new ResponseFactory().Create(commonSubmit(requesttype));
-            return response;
+			return commonSubmit(requesttype,()=> _factory.Create(requesttype.CreateUri()), "");
         }
-
 
         public ICloudFilesResponse Submit(IAddToWebRequest requesttype, string authtoken, ProxyCredentials credentials)
         {
-            var cfrequest = _factory.Create(requesttype.CreateUri(),credentials);
-            cfrequest.Headers.Add(Constants.X_AUTH_TOKEN, HttpUtility.UrlEncode(authtoken));
-            requesttype.Apply(cfrequest);
-           
-            var response = new ResponseFactory().Create(cfrequest);
-            return response;
+           return commonSubmit(requesttype, ()=> _factory.Create(requesttype.CreateUri(),credentials),authtoken );   
         }
     }
 }
