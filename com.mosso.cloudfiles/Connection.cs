@@ -201,7 +201,7 @@ namespace com.mosso.cloudfiles
                 return;
             }			
 		}
-		void buildaccountxml(XmlDocument xmldcoument)
+		void buildaccountxml(ref XmlDocument xmldcoument)
 		{
 			
 			var accountInformationXml = new GetAccountInformationSerialized(StorageUrl, Format.XML);
@@ -227,7 +227,7 @@ namespace com.mosso.cloudfiles
 			xmldcoument = new XmlDocument();
            
 		}
-		void containercreation(string containername){
+		void containercreation(ref string containername){
 		
               
 
@@ -237,12 +237,12 @@ namespace com.mosso.cloudfiles
                 if (createContainerResponse.Status == HttpStatusCode.Accepted)
                     throw new ContainerAlreadyExistsException("The container already exists");
 		}
-		void deletecontainer (string containerName)
+		void deletecontainer (ref string containerName)
 		{
 			var deleteContainer = new DeleteContainer(StorageUrl, containerName);
                 _requestfactory.Submit(deleteContainer, AuthToken, UserCredentials.ProxyCredentials);
 		}
-		void buildcontainerlist (System.Collections.Generic.IList<System.String> containerList)
+		void buildcontainerlist (ref IList<System.String> containerList)
 		{
 			 var getContainers = new GetContainers(StorageUrl);
 
@@ -303,7 +303,7 @@ namespace com.mosso.cloudfiles
 			XmlDocument xmlDocument= null;
             StartProcess
 			.ByLoggingMessage("Getting account information (XML format) for user " + UserCredentials.Username)
-			.ThenDoing(()=>buildaccountxml(xmlDocument))
+			.ThenDoing(()=>buildaccountxml(ref xmlDocument))
 			.AndIfErrorThrownIs<Exception>()
 			.Do(Nothing)
 			.AndLogError("Error getting account information (XML format) for user " + UserCredentials.Username)
@@ -331,7 +331,7 @@ namespace com.mosso.cloudfiles
 
 			StartProcess
 			.ByLoggingMessage("Creating container '" + containerName + "' for user " + UserCredentials.Username)
-			.ThenDoing(()=>containercreation(containerName))
+			.ThenDoing(()=>containercreation(ref containerName))
 			.AndIfErrorThrownIs<Exception>()
 			.Do(Nothing)
 			.AndLogError("Error creating container '" + containerName + "' for user "+ UserCredentials.Username)
@@ -357,7 +357,7 @@ namespace com.mosso.cloudfiles
 			
 			StartProcess
 				.ByLoggingMessage("Deleting container '" + containerName + "' for user " + UserCredentials.Username)
-				.ThenDoing(()=>deletecontainer(containerName))
+				.ThenDoing(()=>deletecontainer( ref containerName))
 				.AndIfErrorThrownIs<WebException>()
 				.Do(ex=>determineReasonForError(ex, containerName))
 				.AndLogError("Error deleting container '" + containerName + "' for user " + UserCredentials.Username)
@@ -381,17 +381,17 @@ namespace com.mosso.cloudfiles
         /// <returns>An instance of List, containing the names of the containers this account owns</returns>
         public override List<string> GetContainers()
         {
-			List<string> containerList = new List<string>();
+			IList<string> containerList = new List<string>();
 			
 			StartProcess
 				.ByLoggingMessage("Getting containers for user " + UserCredentials.Username)
-				.ThenDoing(()=>buildcontainerlist(containerList))
+				.ThenDoing(()=>buildcontainerlist( ref containerList))
 				.AndIfErrorThrownIs<Exception>()
 				.Do(Nothing)
 				.AndLogError("Error getting containers for user " + UserCredentials.Username)
 				.ThenRethrow(true);
 			
-			return containerList;
+			return containerList.ToList();
         }
 
         /// <summary>
