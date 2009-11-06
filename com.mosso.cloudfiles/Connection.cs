@@ -47,7 +47,7 @@ namespace com.mosso.cloudfiles
     public class Connection : AbstractConnection
     {
 
-
+		public Action<Exception> Nothing= (ex)=>{};
         public delegate void OperationCompleteCallback();
 
         public event OperationCompleteCallback OperationComplete;
@@ -56,7 +56,16 @@ namespace com.mosso.cloudfiles
         private bool retry;
         private List<ProgressCallback> callbackFuncs;
         private readonly GenerateRequestByType _requestfactory;
-
+		
+		private bool isNotNullOrEmpty(params string[] strings){
+			foreach(var str in strings){
+				if(String.IsNullOrEmpty(str))
+					return false;
+				
+			}
+			return true;
+		}
+		
         /// <summary>
         /// A constructor used to create an instance of the Connection class
         /// </summary>
@@ -93,33 +102,14 @@ namespace com.mosso.cloudfiles
 
         private void Authenticate()
         {
-            Log.Info(this, "Authenticating user " + UserCredentials.Username);
-            try
-            {
-                var getAuthentication = new GetAuthentication(UserCredentials);
-                var getAuthenticationResponse = _requestfactory.Submit(getAuthentication);
-                // var getAuthenticationResponse = getAuthentication.Apply(request);
-
-                if (getAuthenticationResponse.Status == HttpStatusCode.NoContent)
-                {
-                    StorageUrl = getAuthenticationResponse.Headers[Constants.X_STORAGE_URL];
-                    AuthToken = getAuthenticationResponse.Headers[Constants.X_AUTH_TOKEN];
-                    CdnManagementUrl = getAuthenticationResponse.Headers[Constants.X_CDN_MANAGEMENT_URL];
-                    return;
-                }
-
-                if (!retry && getAuthenticationResponse.Status == HttpStatusCode.Unauthorized)
-                {
-                    retry = true;
-                    Authenticate();
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(this, "Error authenticating user " + UserCredentials.Username, ex);
-                throw;
-            }
+			
+			StartProcess.
+			ByLoggingMessage( "Authenticating user " + UserCredentials.Username).
+			ThenDoing(()=>authenticatesequence()).
+			AndIfErrorThrownIs<Exception>().
+			Do(	Nothing).
+			AndLogError("Error authenticating user " + UserCredentials.Username).
+			ThenRethrow(true);
         }
 
         public void AddProgressWatcher(ProgressCallback progressCallback)
@@ -129,11 +119,7 @@ namespace com.mosso.cloudfiles
 
         private bool IsAuthenticated()
         {
-            return !String.IsNullOrEmpty(AuthToken)
-                   && !String.IsNullOrEmpty(StorageUrl)
-                   && !String.IsNullOrEmpty(AuthToken)
-                   && !String.IsNullOrEmpty(CdnManagementUrl)
-                   && UserCredentials != null;
+			return this.isNotNullOrEmpty(AuthToken, StorageUrl, this.CdnManagementUrl) && UserCredentials != null;
         }
 
         public override IAccount Account
@@ -161,24 +147,120 @@ namespace com.mosso.cloudfiles
         /// </example>
         /// <returns>An instance of AccountInformation, containing the byte size and number of containers associated with this account</returns>
         public override AccountInformation GetAccountInformation()
-        {
-            Log.Info(this, "Getting account information for user " + UserCredentials.Username);
+		{
+			AccountInformation account = null;
+           	StartProcess.
+			ByLoggingMessage("Getting account information for user " + UserCredentials.Username).
+			ThenDoing(()=>buildaccount(account)).
+			AndIfErrorThrownIs<Exception>().
+			Do(Nothing).
+			AndLogError("Error getting account information for user "+ UserCredentials.Username).
+			ThenRethrow(true);
+			
+			return account;
+        }
+		#region private methods to REFACTOR into a service
+		private void buildaccountjson(string jsonResponse)
+		{
+			
+			    var getAccountInformationJson = new GetAccountInformationSerialized(StorageUrl, Format.JSON);
+                var getAccountInformationJsonResponse = _requestfactory.Submit(getAccountInformationJson, AuthToken);
+
+                if (getAccountInformationJsonResponse.ContentBody.Count > 0)
+						jsonResponse = String.Join("", getAccountInformationJsonResponse.ContentBody.ToArray());
+		
+                getAccountInformationJsonResponse.Dispose();
+		}
+		
+		void buildaccount(AccountInformation account)
+		{
+				
+			var getAccountInformation = new GetAccountInformation(StorageUrl);
+            var getAccountInformationResponse = _requestfactory.Submit(getAccountInformation, AuthToken);
+            account = new AccountInformation(getAccountInformationResponse.Headers[Constants.X_ACCOUNT_CONTAINER_COUNT],    getAccountInformationResponse.Headers[Constants.X_ACCOUNT_BYTES_USED]);	
+			
+		}
+		void authenticatesequence()
+		{
+			var getAuthentication = new GetAuthentication(UserCredentials);
+            var getAuthenticationResponse = _requestfactory.Submit(getAuthentication);
+            // var getAuthenticationResponse = getAuthentication.Apply(request);
+
+            if (getAuthenticationResponse.Status == HttpStatusCode.NoContent)
+            {
+            		StorageUrl = getAuthenticationResponse.Headers[Constants.X_STORAGE_URL];
+                AuthToken = getAuthenticationResponse.Headers[Constants.X_AUTH_TOKEN];
+                CdnManagementUrl = getAuthenticationResponse.Headers[Constants.X_CDN_MANAGEMENT_URL];
+                return;
+            }
+
+            if (!retry && getAuthenticationResponse.Status == HttpStatusCode.Unauthorized)
+            {
+				retry = true;
+                Authenticate();
+                return;
+            }			
+		}
+		void buildaccountxml(XmlDocument xmldcoument)
+		{
+			
+			var accountInformationXml = new GetAccountInformationSerialized(StorageUrl, Format.XML);
+            var getAccountInformationXmlResponse = _requestfactory.Submit(accountInformationXml, AuthToken);
+
+            if (getAccountInformationXmlResponse.ContentBody.Count == 0) 
+			{
+				xmldcoument = new XmlDocument();
+				return;
+			}
+            var contentBody = String.Join("", getAccountInformationXmlResponse.ContentBody.ToArray());
+            getAccountInformationXmlResponse.Dispose();
+
             try
             {
-                var getAccountInformation = new GetAccountInformation(StorageUrl);
-                var getAccountInformationResponse = _requestfactory.Submit(getAccountInformation, AuthToken);
-
-                return new AccountInformation(getAccountInformationResponse.Headers[Constants.X_ACCOUNT_CONTAINER_COUNT],
-                                              getAccountInformationResponse.Headers[Constants.X_ACCOUNT_BYTES_USED]);
+                xmldcoument.LoadXml(contentBody);
             }
-            catch (Exception ex)
+            catch (XmlException)
             {
-                Log.Error(this, "Error getting account information for user "
-                        + UserCredentials.Username, ex);
-                throw;
+				xmldcoument = new XmlDocument();
+				return;
             }
-        }
+			xmldcoument = new XmlDocument();
+           
+		}
+		void containercreation(string containername){
+		
+              
 
+                var createContainer = new CreateContainer(StorageUrl, containername);
+                //   var createContainerResponse = _responseFactory.Create(new CloudFilesRequest(createContainer, UserCredentials.ProxyCredentials));
+                var createContainerResponse = _requestfactory.Submit(createContainer, AuthToken);
+                if (createContainerResponse.Status == HttpStatusCode.Accepted)
+                    throw new ContainerAlreadyExistsException("The container already exists");
+		}
+		void deletecontainer (string containerName)
+		{
+			var deleteContainer = new DeleteContainer(StorageUrl, containerName);
+                _requestfactory.Submit(deleteContainer, AuthToken, UserCredentials.ProxyCredentials);
+		}
+		void buildcontainerlist (System.Collections.Generic.IList<System.String> containerList)
+		{
+			 var getContainers = new GetContainers(StorageUrl);
+
+                var getContainersResponse = _requestfactory.Submit(getContainers, AuthToken, UserCredentials.ProxyCredentials);
+                if (getContainersResponse.Status == HttpStatusCode.OK)
+                {
+                    containerList = getContainersResponse.ContentBody;
+                }
+		}
+		void determineReasonForError(WebException ex, string containername){
+			var response = (HttpWebResponse)ex.Response;
+             if (response != null && response.StatusCode == HttpStatusCode.NotFound)
+             	throw new ContainerNotFoundException("The requested container " + containername + " does not exist");
+             if (response != null && response.StatusCode == HttpStatusCode.Conflict)
+             	throw new ContainerNotEmptyException("The container you are trying to delete " + containername + "is not empty");	
+			
+		}
+		#endregion
         /// <summary>
         /// Get account information in json format
         /// </summary>
@@ -192,25 +274,17 @@ namespace com.mosso.cloudfiles
         /// <returns>JSON serialized format of the account information</returns>
         public override string GetAccountInformationJson()
         {
-            try
-            {
-                Log.Info(this, "Getting account information (JSON format) for user " + UserCredentials.Username);
-                var getAccountInformationJson = new GetAccountInformationSerialized(StorageUrl, Format.JSON);
-                var getAccountInformationJsonResponse = _requestfactory.Submit(getAccountInformationJson, AuthToken);
-
-                if (getAccountInformationJsonResponse.ContentBody.Count < 1) return "";
-                var jsonResponse = String.Join("", getAccountInformationJsonResponse.ContentBody.ToArray());
-
-                getAccountInformationJsonResponse.Dispose();
-                return jsonResponse;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(this, "Error getting account information (JSON format) for user "
-                                + UserCredentials.Username, ex);
-                throw;
-            }
-
+			string jsonResponse= "";
+			
+			StartProcess.
+			ByLoggingMessage("Getting account information (JSON format) for user " + UserCredentials.Username).
+			ThenDoing(()=>buildaccountjson(jsonResponse)).
+			AndIfErrorThrownIs<Exception>().
+			Do(Nothing).
+			AndLogError("Error getting account information (JSON format) for user " + UserCredentials.Username).
+			ThenRethrow(true);
+            
+			return jsonResponse;
         }
 
         /// <summary>
@@ -226,36 +300,16 @@ namespace com.mosso.cloudfiles
         /// <returns>XML serialized format of the account information</returns>
         public override XmlDocument GetAccountInformationXml()
         {
-            try
-            {
-                Log.Info(this, "Getting account information (XML format) for user " + UserCredentials.Username);
-                var accountInformationXml = new GetAccountInformationSerialized(StorageUrl, Format.XML);
-                var getAccountInformationXmlResponse = _requestfactory.Submit(accountInformationXml, AuthToken);
-
-                if (getAccountInformationXmlResponse.ContentBody.Count == 0) return new XmlDocument();
-
-                var contentBody = String.Join("", getAccountInformationXmlResponse.ContentBody.ToArray());
-                getAccountInformationXmlResponse.Dispose();
-
-                var xmlDocument = new XmlDocument();
-                try
-                {
-                    xmlDocument.LoadXml(contentBody);
-                }
-                catch (XmlException)
-                {
-                    return xmlDocument;
-                }
-
-                return xmlDocument;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(this, "Error getting account information (XML format) for user "
-                    + UserCredentials.Username, ex);
-                throw;
-            }
-
+			XmlDocument xmlDocument= null;
+            StartProcess
+			.ByLoggingMessage("Getting account information (XML format) for user " + UserCredentials.Username)
+			.ThenDoing(()=>buildaccountxml(xmlDocument))
+			.AndIfErrorThrownIs<Exception>()
+			.Do(Nothing)
+			.AndLogError("Error getting account information (XML format) for user " + UserCredentials.Username)
+			.ThenRethrow(true);
+			
+			return xmlDocument;
         }
 
         /// <summary>
@@ -272,26 +326,16 @@ namespace com.mosso.cloudfiles
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
         public override void CreateContainer(string containerName)
         {
-            try
-            {
-                if (string.IsNullOrEmpty(containerName))
-                    throw new ArgumentNullException();
+			if (string.IsNullOrEmpty(containerName))
+            		throw new ArgumentNullException();
 
-                Log.Info(this, "Creating container '" + containerName + "' for user " + UserCredentials.Username);
-
-                var createContainer = new CreateContainer(StorageUrl, containerName);
-                //   var createContainerResponse = _responseFactory.Create(new CloudFilesRequest(createContainer, UserCredentials.ProxyCredentials));
-                var createContainerResponse = _requestfactory.Submit(createContainer, AuthToken);
-                if (createContainerResponse.Status == HttpStatusCode.Accepted)
-                    throw new ContainerAlreadyExistsException("The container already exists");
-            }
-            catch (Exception ex)
-            {
-                Log.Error(this, "Error creating container '"
-                    + containerName + "' for user "
-                    + UserCredentials.Username, ex);
-                throw;
-            }
+			StartProcess
+			.ByLoggingMessage("Creating container '" + containerName + "' for user " + UserCredentials.Username)
+			.ThenDoing(()=>containercreation(containerName))
+			.AndIfErrorThrownIs<Exception>()
+			.Do(Nothing)
+			.AndLogError("Error creating container '" + containerName + "' for user "+ UserCredentials.Username)
+			.ThenRethrow(true);
         }
 
         /// <summary>
@@ -310,29 +354,19 @@ namespace com.mosso.cloudfiles
         {
             if (string.IsNullOrEmpty(containerName))
                 throw new ArgumentNullException();
+			
+			StartProcess
+				.ByLoggingMessage("Deleting container '" + containerName + "' for user " + UserCredentials.Username)
+				.ThenDoing(()=>deletecontainer(containerName))
+				.AndIfErrorThrownIs<WebException>()
+				.Do(ex=>determineReasonForError(ex, containerName))
+				.AndLogError("Error deleting container '" + containerName + "' for user " + UserCredentials.Username)
+				.ThenRethrow(true);
+		}
 
-            Log.Info(this, "Deleting container '" + containerName + "' for user " + UserCredentials.Username);
+		
 
-            try
-            {
-                var deleteContainer = new DeleteContainer(StorageUrl, containerName);
-                _requestfactory.Submit(deleteContainer, AuthToken, UserCredentials.ProxyCredentials);
-
-            }
-            catch (WebException ex)
-            {
-                Log.Error(this, "Error deleting container '"
-                    + containerName + "' for user "
-                    + UserCredentials.Username, ex);
-
-                var response = ((HttpWebResponse)ex.Response);
-                if (response != null && response.StatusCode == HttpStatusCode.NotFound)
-                    throw new ContainerNotFoundException("The requested container " + containerName + " does not exist");
-                if (response != null && response.StatusCode == HttpStatusCode.Conflict)
-                    throw new ContainerNotEmptyException("The container you are trying to delete " + containerName + "is not empty");
-                throw;
-            }
-        }
+        
 
         /// <summary>
         /// This method retrieves a list of containers associated with a given account
@@ -347,25 +381,17 @@ namespace com.mosso.cloudfiles
         /// <returns>An instance of List, containing the names of the containers this account owns</returns>
         public override List<string> GetContainers()
         {
-            Log.Info(this, "Getting containers for user " + UserCredentials.Username);
-            try
-            {
-                IList<string> containerList = null;
-                var getContainers = new GetContainers(StorageUrl);
-
-                var getContainersResponse = _requestfactory.Submit(getContainers, AuthToken, UserCredentials.ProxyCredentials);
-                if (getContainersResponse.Status == HttpStatusCode.OK)
-                {
-                    containerList = getContainersResponse.ContentBody;
-                }
-                return containerList.ToList();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(this, "Error getting containers for user " + UserCredentials.Username, ex);
-                throw;
-            }
-
+			List<string> containerList = new List<string>();
+			
+			StartProcess
+				.ByLoggingMessage("Getting containers for user " + UserCredentials.Username)
+				.ThenDoing(()=>buildcontainerlist(containerList))
+				.AndIfErrorThrownIs<Exception>()
+				.Do(Nothing)
+				.AndLogError("Error getting containers for user " + UserCredentials.Username)
+				.ThenRethrow(true);
+			
+			return containerList;
         }
 
         /// <summary>
@@ -383,25 +409,18 @@ namespace com.mosso.cloudfiles
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
         public override List<string> GetContainerItemList(string containerName)
         {
-            try
-            {
-                if (string.IsNullOrEmpty(containerName))
-                    throw new ArgumentNullException();
-
-                Log.Info(this, "Getting container item list for container '"
-                    + containerName + "' for user "
-                    + UserCredentials.Username);
-
-                return GetContainerItemList(containerName, null);
-            }
-            catch (Exception ex)
-            {
-
-                Log.Error(this, "Error getting item list for container '"
-                    + containerName + "' for user "
-                    + UserCredentials.Username, ex);
-                throw;
-            }
+			List<string> containerList = new List<string>();
+			if (string.IsNullOrEmpty(containerName))
+            		throw new ArgumentNullException();
+			StartProcess
+				.ByLoggingMessage("Getting container item list for container '" + containerName + "' for user " + UserCredentials.Username)
+				.ThenDoing(()=>containerList =  GetContainerItemList(containerName, null))
+				.AndIfErrorThrownIs<Exception>()
+				.Do(Nothing)
+				.AndLogError("Error getting item list for container '" + containerName + "' for user "  + UserCredentials.Username)
+				.ThenRethrow(true);
+			return containerList;
+            
         }
 
         /// <summary>

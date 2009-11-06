@@ -96,6 +96,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\StringHelperSpecs.cs" />
     <Compile Include="TestBase.cs" />
+    <Compile Include="GenerateRequestByTypeSpec.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="StorageObjectTest.txt">
