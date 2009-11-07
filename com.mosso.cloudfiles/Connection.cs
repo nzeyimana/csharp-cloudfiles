@@ -204,28 +204,31 @@ namespace com.mosso.cloudfiles
 		}
 		XmlDocument buildaccountxml()
 		{
-			XmlDocument xmldcoument=null;
+		  
 			var accountInformationXml = new GetAccountInformationSerialized(StorageUrl, Format.XML);
             var getAccountInformationXmlResponse = _requestfactory.Submit(accountInformationXml, AuthToken);
 
             if (getAccountInformationXmlResponse.ContentBody.Count == 0) 
 			{
-				return	xmldcoument = new XmlDocument();
+				return	new XmlDocument();
 			
 			}
             var contentBody = String.Join("", getAccountInformationXmlResponse.ContentBody.ToArray());
+			
             getAccountInformationXmlResponse.Dispose();
 
             try
             {
-                xmldcoument.LoadXml(contentBody);
+                var doc =  new XmlDocument();
+					doc.LoadXml(contentBody);
+				return doc;
             }
             catch (XmlException)
             {
-				return xmldcoument = new XmlDocument();
+				return  new XmlDocument();
 				
             }
-			return xmldcoument = new XmlDocument();
+			 
            
 		}
 		void containercreation(ref string containername){
