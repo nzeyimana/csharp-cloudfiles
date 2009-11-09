@@ -44,6 +44,7 @@ namespace com.mosso.cloudfiles.integration.tests.ConnectionSpecs.GetContainerInf
     [TestFixture]
     public class When_getting_serialized_container_information_for_a_container_in_json_format_and_objects_exist : TestBase
     {
+		private string jsonReturnValue;
 		[TestFixtureSetUp]
 		public void setup()
 		{
@@ -52,7 +53,7 @@ namespace com.mosso.cloudfiles.integration.tests.ConnectionSpecs.GetContainerInf
             try
             {
                 connection.PutStorageItem(Constants.CONTAINER_NAME, Constants.StorageItemNameJpg);
-                string jsonReturnValue = connection.GetContainerInformationJson(Constants.CONTAINER_NAME);
+                jsonReturnValue = connection.GetContainerInformationJson(Constants.CONTAINER_NAME);
               
             }
             finally
@@ -86,7 +87,7 @@ namespace com.mosso.cloudfiles.integration.tests.ConnectionSpecs.GetContainerInf
 				var dict = new Dictionary<string,string>();
 				dict.Add("X-User-Agent-ACL", "Mozilla");
 				dict.Add("X-Referrer-ACL", "testdomain.com");
-                connection.PutStorageItem(Constants.CONTAINER_NAME, Constants.StorageItemNameJpg, Constants.StorageItemNameJpg,dict );
+                connection.PutStorageItem(Constants.CONTAINER_NAME, Constants.StorageItemNameJpg, dict );
                 xmlReturnValue = connection.GetContainerInformationXml(Constants.CONTAINER_NAME);
                
             }
