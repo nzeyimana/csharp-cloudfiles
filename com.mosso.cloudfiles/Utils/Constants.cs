@@ -1,4 +1,4 @@
-﻿namespace com.mosso.cloudfiles.utils
+namespace com.mosso.cloudfiles.utils
 {
     /// <summary>
     /// This class initializes the constants which would be utilized all over the application.
@@ -29,5 +29,6 @@
         public const string CONTENT_LENGTH_HEADER = "Content-Length";
         public const string CONTENT_TYPE_HEADER = "Content-Type";
         public const string MOSSO_AUTH_URL = "https://api.mosso.com/auth";
+		
     }
 }

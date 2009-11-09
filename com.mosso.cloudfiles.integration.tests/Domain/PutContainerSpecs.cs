@@ -66,7 +66,6 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutContainerSpecs
         [Test]
         public void Should_return_accepted_status_when_the_container_already_exists()
         {
-            
             CreateContainer createContainer = new CreateContainer(storageUrl,  Constants.CONTAINER_NAME);
 
             IResponse response = new GenerateRequestByType().Submit(createContainer, authToken);
@@ -79,7 +78,7 @@ namespace com.mosso.cloudfiles.integration.tests.domain.PutContainerSpecs
 
             DeleteContainer(storageUrl, Constants.CONTAINER_NAME);
         }
-
+		
         private void DeleteContainer(string storageUri, string containerName)
         {
             DeleteContainer deleteContainer = new DeleteContainer(storageUri,  containerName);

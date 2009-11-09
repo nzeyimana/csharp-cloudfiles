@@ -29,7 +29,7 @@ namespace com.mosso.cloudfiles.domain.request
         private ICloudFilesResponse commonSubmit(IAddToWebRequest requesttype, Func<ICloudFilesRequest> requeststrategy, string authtoken)
         {
             var cfrequest = requeststrategy.Invoke();
-			//only way I've figured out how to make auth header logic conditional, this is a smell and in need of better pattern
+			//only way I've figured out how to make auth header logic conditional, this is a smell and in need of a better pattern
 			if (!String.IsNullOrEmpty(authtoken))
 				AddAuthHeaderToRequest(cfrequest, authtoken); 
 			
