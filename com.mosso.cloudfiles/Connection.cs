@@ -47,12 +47,9 @@ namespace com.mosso.cloudfiles
     public class Connection : AbstractConnection
     {
 
-		public Action<Exception> Nothing= (ex)=>{};
-        public delegate void OperationCompleteCallback();
-
-        public event OperationCompleteCallback OperationComplete;
-
-        public delegate void ProgressCallback(int bytesWritten);
+	
+		
+		#region private fields
         private bool retry;
         private List<ProgressCallback> callbackFuncs;
         private readonly GenerateRequestByType _requestfactory;
@@ -65,7 +62,7 @@ namespace com.mosso.cloudfiles
 			}
 			return true;
 		}
-		
+		#endregion
         /// <summary>
         /// A constructor used to create an instance of the Connection class
         /// </summary>
@@ -77,20 +74,8 @@ namespace com.mosso.cloudfiles
         /// </example>
         /// <param name="userCredentials">An instance of the UserCredentials class, containing all pertinent authentication information</param>
         /// <exception cref="ArgumentNullException">Thrown when any of the reference parameters are null</exception>
-        public Connection(UserCredentials userCredentials)
-        {
-            _requestfactory = new GenerateRequestByType();
-            callbackFuncs = new List<ProgressCallback>();
-            Log.EnsureInitialized();
-            AuthToken = "";
-            StorageUrl = "";
-            if (userCredentials == null) throw new ArgumentNullException("userCredentials");
-
-            UserCredentials = userCredentials;
-                      
-            VerifyAuthentication();
-        }
-    
+      
+		#region protected and private methods
       
         protected virtual void VerifyAuthentication()
         {
@@ -100,7 +85,44 @@ namespace com.mosso.cloudfiles
             }
         }
 
-        private void Authenticate()
+  
+
+        private void MakeStorageDirectory(string containerName, string remoteobjname )
+        {
+            if (string.IsNullOrEmpty(containerName) ||
+                string.IsNullOrEmpty(remoteobjname))
+                throw new ArgumentNullException();
+
+            Log.Info(this, "Putting storage item "
+                + remoteobjname + " with metadata into container '"
+                + containerName + "' for user "
+                + UserCredentials.Username);
+
+            try
+            {
+
+                var makedirectory = new PutStorageDirectory(StorageUrl, containerName, remoteobjname);
+                _requestfactory.Submit(makedirectory, AuthToken, UserCredentials.ProxyCredentials);
+            }
+            catch (WebException webException)
+            {
+                Log.Error(this, "Error putting storage item "
+                    + remoteobjname + " with metadata into container '"
+                    + containerName + "' for user "
+                    + UserCredentials.Username, webException);
+
+                var webResponse = (HttpWebResponse)webException.Response;
+                if (webResponse == null) throw;
+                if (webResponse.StatusCode == HttpStatusCode.BadRequest)
+                    throw new ContainerNotFoundException("The requested container does not exist");
+                if (webResponse.StatusCode == HttpStatusCode.PreconditionFailed)
+                    throw new PreconditionFailedException(webException.Message);
+
+                throw;
+            }
+
+		}
+		private void Authenticate()
         {
 			
 			StartProcess.
@@ -111,54 +133,52 @@ namespace com.mosso.cloudfiles
 			AndLogError("Error authenticating user " + UserCredentials.Username).
 			Now();
         }
-
-        public void AddProgressWatcher(ProgressCallback progressCallback)
-        {
-            callbackFuncs.Add(progressCallback);
-        }
-
         private bool IsAuthenticated()
         {
 			return this.isNotNullOrEmpty(AuthToken, StorageUrl, this.CdnManagementUrl) && UserCredentials != null;
         }
-
-        public override IAccount Account
+		private string getContainerCDNUri(Container container)
         {
-            get
+            try
             {
-                if (IsAuthenticated())
-                    return new CF_Account(this);
+                var public_container = GetPublicContainerInformation(container.Name);
+                return public_container == null ? "" : public_container.CdnUri;
+            }
+            catch (ContainerNotFoundException)
+            {
+                return "";
+            }
+            catch (WebException we)
+            {
+                Log.Error(this, "Error getting container CDN Uril from getContainerInformation for container '"
+                    + container.Name + "' for user "
+                    + UserCredentials.Username, we);
 
-                Authenticate();
-
-                return null;
+                var response = (HttpWebResponse)we.Response;
+                if (response != null && response.StatusCode == HttpStatusCode.Unauthorized)
+                    throw new AuthenticationFailedException(we.Message);
+                throw;
             }
         }
-
-        /// <summary>
-        /// This method returns the number of containers and the size, in bytes, of the specified account
-        /// </summary>
-        /// <example>
-        /// <code>
-        /// UserCredentials userCredentials = new UserCredentials("username", "api key");
-        /// IConnection connection = new Connection(userCredentials);
-        /// AccountInformation accountInformation = connection.GetAccountInformation();
-        /// </code>
-        /// </example>
-        /// <returns>An instance of AccountInformation, containing the byte size and number of containers associated with this account</returns>
-        public override AccountInformation GetAccountInformation()
-		{
-			
-           	return StartProcess.
-			ByLoggingMessage("Getting account information for user " + UserCredentials.Username)
-		    .ThenDoing<AccountInformation>(()=>buildaccount()).
-			AndIfErrorThrownIs<Exception>().
-			Do(Nothing).
-			AndLogError("Error getting account information for user "+ UserCredentials.Username).
-			Now();
-			
-		 
+		private Dictionary<string, string> GetMetadata(ICloudFilesResponse getStorageItemResponse)
+        {
+            var metadata = new Dictionary<string, string>();
+            var headers = getStorageItemResponse.Headers;
+            foreach (var key in headers.AllKeys)
+            {
+                if (key.IndexOf(Constants.META_DATA_HEADER) > -1)
+                    metadata.Add(key, headers[key]);
+            }
+            return metadata;
         }
+		private void StoreFile(string filename, Stream contentStream)
+        {
+            using (var file = File.Create(filename))
+            {
+                contentStream.WriteTo(file);
+            }
+        }
+		#endregion
 		#region private methods to REFACTOR into a service
 		private string buildaccountjson()
 		{
@@ -231,7 +251,7 @@ namespace com.mosso.cloudfiles
 			 
            
 		}
-		void containercreation(ref string containername){
+		void containercreation(string containername){
 		
               
 
@@ -241,7 +261,7 @@ namespace com.mosso.cloudfiles
                 if (createContainerResponse.Status == HttpStatusCode.Accepted)
                     throw new ContainerAlreadyExistsException("The container already exists");
 		}
-		void deletecontainer (ref string containerName)
+		void deletecontainer (string containerName)
 		{
 			var deleteContainer = new DeleteContainer(StorageUrl, containerName);
                 _requestfactory.Submit(deleteContainer, AuthToken, UserCredentials.ProxyCredentials);
@@ -267,6 +287,67 @@ namespace com.mosso.cloudfiles
 			
 		}
 		#endregion
+		public Connection(UserCredentials userCredentials)
+        {
+            _requestfactory = new GenerateRequestByType();
+            callbackFuncs = new List<ProgressCallback>();
+            Log.EnsureInitialized();
+            AuthToken = "";
+            StorageUrl = "";
+            if (userCredentials == null) throw new ArgumentNullException("userCredentials");
+
+            UserCredentials = userCredentials;
+                      
+            VerifyAuthentication();
+        }
+		#region publicmethods
+		public Action<Exception> Nothing= (ex)=>{};
+        public delegate void OperationCompleteCallback();
+
+        public event OperationCompleteCallback OperationComplete;
+
+        public delegate void ProgressCallback(int bytesWritten);
+        public override IAccount Account
+        {
+            get
+            {
+                if (IsAuthenticated())
+                    return new CF_Account(this);
+
+                Authenticate();
+
+                return null;
+            }
+        }
+ 		public void AddProgressWatcher(ProgressCallback progressCallback)
+        {
+            callbackFuncs.Add(progressCallback);
+        }
+        /// <summary>
+        /// This method returns the number of containers and the size, in bytes, of the specified account
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// UserCredentials userCredentials = new UserCredentials("username", "api key");
+        /// IConnection connection = new Connection(userCredentials);
+        /// AccountInformation accountInformation = connection.GetAccountInformation();
+        /// </code>
+        /// </example>
+        /// <returns>An instance of AccountInformation, containing the byte size and number of containers associated with this account</returns>
+        public override AccountInformation GetAccountInformation()
+		{
+			
+           	return StartProcess.
+			ByLoggingMessage("Getting account information for user " + UserCredentials.Username)
+		    .ThenDoing<AccountInformation>(()=>buildaccount()).
+			AndIfErrorThrownIs<Exception>().
+			Do(Nothing).
+			AndLogError("Error getting account information for user "+ UserCredentials.Username).
+			Now();
+			
+		 
+        }
+	
         /// <summary>
         /// Get account information in json format
         /// </summary>
@@ -336,7 +417,7 @@ namespace com.mosso.cloudfiles
 
 			StartProcess
 			.ByLoggingMessage("Creating container '" + containerName + "' for user " + UserCredentials.Username)
-			.ThenDoing(()=>containercreation(ref containerName))
+			.ThenDoing(()=>containercreation( containerName))
 			.AndIfErrorThrownIs<Exception>()
 			.Do(Nothing)
 			.AndLogError("Error creating container '" + containerName + "' for user "+ UserCredentials.Username)
@@ -362,7 +443,7 @@ namespace com.mosso.cloudfiles
 			
 			StartProcess
 				.ByLoggingMessage("Deleting container '" + containerName + "' for user " + UserCredentials.Username)
-				.ThenDoing(()=>deletecontainer( ref containerName))
+				.ThenDoing(()=>deletecontainer(  containerName))
 				.AndIfErrorThrownIs<WebException>()
 				.Do(ex=>determineReasonForError(ex, containerName))
 				.AndLogError("Error deleting container '" + containerName + "' for user " + UserCredentials.Username)
@@ -471,41 +552,7 @@ namespace com.mosso.cloudfiles
             }
         }
 
-        private void MakeStorageDirectory(string containerName, string remoteobjname )
-        {
-            if (string.IsNullOrEmpty(containerName) ||
-                string.IsNullOrEmpty(remoteobjname))
-                throw new ArgumentNullException();
-
-            Log.Info(this, "Putting storage item "
-                + remoteobjname + " with metadata into container '"
-                + containerName + "' for user "
-                + UserCredentials.Username);
-
-            try
-            {
-
-                var makedirectory = new PutStorageDirectory(StorageUrl, containerName, remoteobjname);
-                _requestfactory.Submit(makedirectory, AuthToken, UserCredentials.ProxyCredentials);
-            }
-            catch (WebException webException)
-            {
-                Log.Error(this, "Error putting storage item "
-                    + remoteobjname + " with metadata into container '"
-                    + containerName + "' for user "
-                    + UserCredentials.Username, webException);
-
-                var webResponse = (HttpWebResponse)webException.Response;
-                if (webResponse == null) throw;
-                if (webResponse.StatusCode == HttpStatusCode.BadRequest)
-                    throw new ContainerNotFoundException("The requested container does not exist");
-                if (webResponse.StatusCode == HttpStatusCode.PreconditionFailed)
-                    throw new PreconditionFailedException(webException.Message);
-
-                throw;
-            }
-
-        }
+    
         /// <summary>
         /// This method retrieves the contents of a container
         /// </summary>
@@ -616,29 +663,7 @@ namespace com.mosso.cloudfiles
             }
         }
 
-        private string getContainerCDNUri(Container container)
-        {
-            try
-            {
-                var public_container = GetPublicContainerInformation(container.Name);
-                return public_container == null ? "" : public_container.CdnUri;
-            }
-            catch (ContainerNotFoundException)
-            {
-                return "";
-            }
-            catch (WebException we)
-            {
-                Log.Error(this, "Error getting container CDN Uril from getContainerInformation for container '"
-                    + container.Name + "' for user "
-                    + UserCredentials.Username, we);
-
-                var response = (HttpWebResponse)we.Response;
-                if (response != null && response.StatusCode == HttpStatusCode.Unauthorized)
-                    throw new AuthenticationFailedException(we.Message);
-                throw;
-            }
-        }
+    
 
         /// <summary>
         /// JSON serialized format of the container's objects
@@ -1326,17 +1351,7 @@ namespace com.mosso.cloudfiles
             }
         }
 
-        private Dictionary<string, string> GetMetadata(ICloudFilesResponse getStorageItemResponse)
-        {
-            var metadata = new Dictionary<string, string>();
-            var headers = getStorageItemResponse.Headers;
-            foreach (var key in headers.AllKeys)
-            {
-                if (key.IndexOf(Constants.META_DATA_HEADER) > -1)
-                    metadata.Add(key, headers[key]);
-            }
-            return metadata;
-        }
+ 
 
         /// <summary>
         /// This method downloads a storage object from cloudfiles asychronously
@@ -1579,16 +1594,7 @@ namespace com.mosso.cloudfiles
 
         //    private event ProgressCallback Progress;
 
-        private void StoreFile(string filename, Stream contentStream)
-        {
-            using (var file = File.Create(filename))
-            {
-                contentStream.WriteTo(file);
-            }
 
-
-
-        }
         /// <summary>
         /// This method applies meta tags to a storage object on cloudfiles
         /// </summary>
@@ -1953,5 +1959,6 @@ namespace com.mosso.cloudfiles
 
 
         }
+		#endregion
     }
 }
