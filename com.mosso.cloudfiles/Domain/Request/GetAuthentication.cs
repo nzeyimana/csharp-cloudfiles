@@ -20,13 +20,13 @@ namespace com.mosso.cloudfiles.domain.request
         /// <summary>
         /// GetAuthentication constructor
         /// </summary>
-        /// <param name="userCredentials">the UserCredentials instace to use when attempting authentication</param>
+        /// <param name="userCreds">the UserCredentials instace to use when attempting authentication</param>
         /// <exception cref="System.ArgumentNullException">Thrown when any of the reference arguments are null</exception>
-        public GetAuthentication(UserCredentials userCredentials)
+        public GetAuthentication(UserCredentials userCreds)
         {
-            if(userCredentials == null)
+            if(userCreds == null)
             throw new ArgumentNullException();
-            _userCredentials = userCredentials;
+            _userCredentials = userCreds;
         }
 
         public Uri CreateUri()

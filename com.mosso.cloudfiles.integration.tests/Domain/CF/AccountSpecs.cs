@@ -8,15 +8,15 @@ namespace com.mosso.cloudfiles.integration.tests.Domain.CF.AccountSpecs
     [TestFixture]
     public class AccountIntegrationTestBase
     {
-        protected UserCredentials userCredentials;
-        protected AbstractConnection connection;
+        protected UserCredentials userCreds;
+        protected IConnection connection;
         protected IAccount account;
 
         [SetUp]
         public void SetUp()
         {
-            userCredentials = new UserCredentials(Credentials.USERNAME, Credentials.API_KEY);
-            connection = new Connection(userCredentials);
+            userCreds = new UserCredentials(Credentials.USERNAME, Credentials.API_KEY);
+            connection = new Connection(userCreds);
 
             account = connection.Account;
         }

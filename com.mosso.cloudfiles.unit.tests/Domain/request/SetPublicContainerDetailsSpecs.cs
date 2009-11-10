@@ -15,7 +15,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.SetPublicContainerDetai
         [ExpectedException(typeof(ArgumentNullException))]
         public void should_throw_argument_null_exception()
         {
-            new SetPublicContainerDetails(null, "containername", true, -1);
+            new SetPublicContainerDetails(null, "containername", true, false, -1, "", "");
         }
     }
 
@@ -26,7 +26,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.SetPublicContainerDetai
         [ExpectedException(typeof(ArgumentNullException))]
         public void should_throw_argument_null_exception()
         {
-            new SetPublicContainerDetails("", "containername", true, -1);
+            new SetPublicContainerDetails("", "containername", true, false, -1, "", "");
         }
     }
 
@@ -38,7 +38,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.SetPublicContainerDetai
         [ExpectedException(typeof(ArgumentNullException))]
         public void should_throw_argument_null_exception()
         {
-            new SetPublicContainerDetails("http://cdnmanagementurl", null, true, -1);
+            new SetPublicContainerDetails("http://cdnmanagementurl", null, true, false, -1, "","");
         }
     }
 
@@ -49,7 +49,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.SetPublicContainerDetai
         [ExpectedException(typeof(ArgumentNullException))]
         public void should_throw_argument_null_exception()
         {
-            new SetPublicContainerDetails("http://cdnmanagementurl", "", true, -1);
+            new SetPublicContainerDetails("http://cdnmanagementurl", "", true, false,-1, "", "");
         }
     }
 
@@ -59,7 +59,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.SetPublicContainerDetai
         [Test]
         public void should_throw_argument_null_exception()
         {
-            var setPublicContainerDetails = new SetPublicContainerDetails("http://cdnmanagementurl", "containername", true, -1);
+            var setPublicContainerDetails = new SetPublicContainerDetails("http://cdnmanagementurl", "containername", true,false, -1, "", "");
           
             Asserts.AssertHeaders(setPublicContainerDetails,utils.Constants.X_CDN_TTL,null );
             
@@ -74,7 +74,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.SetPublicContainerDetai
         [SetUp]
         public void setup()
         {
-            setPublicContainerDetails = new SetPublicContainerDetails("http://cdnmanagementurl", "containername", true, 12345);
+            setPublicContainerDetails = new SetPublicContainerDetails("http://cdnmanagementurl", "containername", true,false ,12345, "Useragentacl", "refacl");
         }
 
         [Test]
@@ -108,6 +108,18 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.SetPublicContainerDetai
         {
             Asserts.AssertHeaders(setPublicContainerDetails, utils.Constants.X_CDN_TTL, "12345");
          
+        }
+        [Test]
+        public void should_have_ref_acl()
+        {
+            Asserts.AssertHeaders(setPublicContainerDetails, utils.Constants.X_REFERRER_ACL, "refacl");
+
+        }
+        [Test]
+        public void should_have_user_agent_acl()
+        {
+            Asserts.AssertHeaders(setPublicContainerDetails, utils.Constants.X_USER_AGENT_ACL, "Useragentacl");
+
         }
     }
 }

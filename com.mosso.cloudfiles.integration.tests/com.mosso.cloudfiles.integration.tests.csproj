@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -57,8 +57,8 @@
   <ItemGroup>
     <Compile Include="ConnectionSpecs\AuthenticationSpecs.cs" />
     <Compile Include="ConnectionSpecs\GetStorageItemInformationSpecs.cs" />
-    <Compile Include="ConnectionSpecs\LoggingOnPublicContainerSpecs.cs" />
     <Compile Include="ConnectionSpecs\MakePathSpecs.cs" />
+    <Compile Include="ConnectionSpecs\SetAclOnPublicContainerSpec.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Credentials.cs">
       <SubType>Code</SubType>

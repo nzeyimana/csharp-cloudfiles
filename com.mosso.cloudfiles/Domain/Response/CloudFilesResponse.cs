@@ -46,6 +46,7 @@ namespace com.mosso.cloudfiles.domain.response
         private bool HasTextBody()
         {
             return (_webResponse.ContentType.Contains("application/json") ||
+                _webResponse.ContentType=="application/xml"||
                     _webResponse.ContentType == "application/xml; charset=utf-8" ||
                     _webResponse.ContentType.Contains("text/plain") && _webResponse.ContentLength == -1) ||
                    _webResponse.ContentType == "text/plain; charset=UTF-8";

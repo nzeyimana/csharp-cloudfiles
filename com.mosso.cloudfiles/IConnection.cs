@@ -38,7 +38,7 @@ namespace com.mosso.cloudfiles
         Uri MarkContainerAsPublic(string containerName);
         Uri MarkContainerAsPublic(string containerName, int timeToLiveInSeconds);
         void MarkContainerAsPrivate(string containerName);
-        void SetTTLOnPublicContainer(string containerName, int timeToLiveInSeconds);
+       
         Container GetPublicContainerInformation(string containerName);
         void MakePath(string containerName, string path);
         IAccount Account { get; }
@@ -53,16 +53,9 @@ namespace com.mosso.cloudfiles
         /// </summary>
         string AuthToken { get;  set; }
 
-        /// <summary>
-        /// Adds logging for access to your public containers.
-        /// </summary>
-        /// <example>
-        /// UserCredentials userCredentials = new UserCredentials("username", "api key");
-        /// IConnection connection = new Connection(userCredentials);
-        /// connection.SetLoggingOnPublicContainer("container name",true)
-        /// </example>
-        /// <param name="publiccontainer">must be an already existig public container</param>
-        /// <param name="loggingenabled">enabled makes cdn logging available</param>
-        void SetLoggingOnPublicContainer(string publiccontainer, bool loggingenabled);
+
+        void SetDetailsOnPublicContainer(string publiccontainer, bool loggingenabled, int ttl, string referreracl, string useragentacl );
+        XmlDocument GetPublicAccountInformationXML();
+        string GetPublicAccountInformationJSON();
     }
 }

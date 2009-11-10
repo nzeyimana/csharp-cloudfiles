@@ -126,8 +126,8 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request.GetAuthenticationSpecs
         [Test]
         public void Should_replace_plus_sign_with_percent_20_on_account_name_username_and_password()
         {
-            UserCredentials userCredentials = new UserCredentials(new Uri("http://tempuri"), "user name", "pass word", "v 1", "account name");
-            GetAuthentication getAuthentication = new GetAuthentication(userCredentials);
+            UserCredentials userCreds = new UserCredentials(new Uri("http://tempuri"), "user name", "pass word", "v 1", "account name");
+            GetAuthentication getAuthentication = new GetAuthentication(userCreds);
             var _mockrequest = new Mock<ICloudFilesRequest>();
             var headers = new WebHeaderCollection();
             _mockrequest.SetupGet(x => x.Headers).Returns(headers);

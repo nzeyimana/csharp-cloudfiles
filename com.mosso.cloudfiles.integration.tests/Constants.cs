@@ -12,9 +12,10 @@ namespace com.mosso.cloudfiles.integration.tests
         public const string XAccountBytesUsed = "X-Account-Bytes-Used";
         public static string XCdnManagementUrl = "X-CDN-Management-URL";
         public static string XAuthToken = "X-Auth-Token";
+        public static string XLogRetention = "X-Log-Retention";
         public const string ETAG = "ETag";
-        public const string CONTAINER_NAME = "integration.tests.container";
-
+        public const string CONTAINER_NAME = "integration.tests.container.new";
+         
         //Mosso accounts for authentication
         public const string MOSSO_AUTH_URL = "https://api.mosso.com/auth";
 

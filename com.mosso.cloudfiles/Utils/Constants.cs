@@ -29,6 +29,7 @@ namespace com.mosso.cloudfiles.utils
         public const string CONTENT_LENGTH_HEADER = "Content-Length";
         public const string CONTENT_TYPE_HEADER = "Content-Type";
         public const string MOSSO_AUTH_URL = "https://api.mosso.com/auth";
+        public const string X_LOG_RETENTION = "X-Log-Retention";
 		
     }
 }

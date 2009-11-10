@@ -12,9 +12,9 @@ namespace com.mosso.cloudfiles.unit.tests.Services.ConnectionSpecs
         [Test]
         public void Should_instantiate_engine_without_throwing_exception_when_authentication_passes()
         {
-            UserCredentials userCredentials = new UserCredentials(new Uri(Constants.AUTH_URL), Constants.CREDENTIALS_USER_NAME, Constants.CREDENTIALS_PASSWORD, Constants.CREDENTIALS_CLOUD_VERSION, Constants.CREDENTIALS_ACCOUNT_NAME);
+            UserCredentials userCreds = new UserCredentials(new Uri(Constants.AUTH_URL), Constants.CREDENTIALS_USER_NAME, Constants.CREDENTIALS_PASSWORD, Constants.CREDENTIALS_CLOUD_VERSION, Constants.CREDENTIALS_ACCOUNT_NAME);
 
-            MockConnection conection = new MockConnection(userCredentials);
+            MockConnection conection = new MockConnection(userCreds);
 
             Assert.That(conection.AuthenticationSuccessful, Is.True);
         }
@@ -22,7 +22,7 @@ namespace com.mosso.cloudfiles.unit.tests.Services.ConnectionSpecs
 
     internal class MockConnection : Connection
     {
-        public MockConnection(UserCredentials userCredentials) : base(userCredentials){}
+        public MockConnection(UserCredentials userCreds) : base(userCreds){}
 
         public bool AuthenticationSuccessful { get; private set; }
 

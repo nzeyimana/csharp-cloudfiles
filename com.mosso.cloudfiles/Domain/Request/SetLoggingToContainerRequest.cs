@@ -30,7 +30,7 @@ namespace com.mosso.cloudfiles.domain.request
 
         public void Apply(ICloudFilesRequest request)
         {
-            request.Method = "PUT";
+            request.Method = "POST";
             string enabled = "False";
             if (_loggingenabled)
                 enabled = "True";

@@ -42,11 +42,11 @@ namespace com.mosso.cloudfiles.integration.tests.ConnectionSpecs.GetContainerInf
     }
 
     [TestFixture]
-    public class When_getting_serialized_container_information_for_a_container_in_json_format_and_objects_exist : TestBase
+    public class When_getting_serialized_container_information_for_a_container_in_json_format_and_objects_exist : SharedTestBase
     {
 		private string jsonReturnValue;
-		[TestFixtureSetUp]
-		public void setup()
+	 
+		protected override void  SetUp()
 		{
 			  connection.CreateContainer(Constants.CONTAINER_NAME);
 
@@ -73,12 +73,12 @@ namespace com.mosso.cloudfiles.integration.tests.ConnectionSpecs.GetContainerInf
     }
 
     [TestFixture]
-    public class When_getting_serialized_container_information_for_a_container_in_xml_format_and_objects_exist : TestBase
+    public class When_getting_serialized_container_information_for_a_container_in_xml_format_and_objects_exist : SharedTestBase
     {
 		private XmlDocument xmlReturnValue;
-		[TestFixtureSetUp]
-		public void setup()
-		{
+		 
+		protected override void  SetUp()
+        {
 		
 			 connection.CreateContainer(Constants.CONTAINER_NAME);
 
@@ -107,19 +107,7 @@ namespace com.mosso.cloudfiles.integration.tests.ConnectionSpecs.GetContainerInf
                 Assert.That(xmlReturnValue.InnerXml.IndexOf(expectedSubString) > -1, Is.True);
 		
 		}
-        [Test]
-        public void should_have_referrer_acl()
-        {
-            StringAssert.Contains( "<referrer_acl>testdomain.com</referrer_acl>",xmlReturnValue.InnerXml);
-           
-        }
-		[Test]
-		public void should_have_user_agent_acl()
-		{
-		
-			 StringAssert.Contains( "<useragent_acl>Mozilla</useragent_acl>",xmlReturnValue.InnerXml);
-		
-		}
+
     }
 	 
 }

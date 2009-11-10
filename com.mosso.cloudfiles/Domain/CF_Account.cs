@@ -23,12 +23,12 @@ namespace com.mosso.cloudfiles.domain
 
     public class CF_Account : IAccount
     {
-        private readonly AbstractConnection connection;
+        private readonly IConnection connection;
         protected List<IContainer> containers;
         protected int containerCount;
         protected long bytesUsed;
 
-        public CF_Account(AbstractConnection connection)
+        public CF_Account(IConnection connection)
         {
             this.connection = connection;
             containers = new List<IContainer>();
@@ -63,7 +63,7 @@ namespace com.mosso.cloudfiles.domain
         }
 
         public Uri CDNManagementUrl { get; set; }
-        public UserCredentials UserCredentials { get; set; }
+        public UserCredentials UserCreds { get; set; }
 
         public string JSON
         {

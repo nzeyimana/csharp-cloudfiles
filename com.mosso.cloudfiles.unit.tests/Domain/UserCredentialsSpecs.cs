@@ -8,7 +8,7 @@ namespace com.mosso.cloudfiles.unit.tests.domain.UserCredentialsSpecs
     [TestFixture]
     public class When_creating_usercredentials_with_auth_url
     {
-        private UserCredentials userCredentials;
+        private UserCredentials userCreds;
         private ProxyCredentials proxyCredentials;
         private Uri authUrl;
 
@@ -19,7 +19,7 @@ namespace com.mosso.cloudfiles.unit.tests.domain.UserCredentialsSpecs
 
             proxyCredentials = new ProxyCredentials(Constants.PROXY_ADDRESS, Constants.PROXY_USERNAME, Constants.PROXY_PASSWORD, Constants.PROXY_DOMAIN);
 
-            userCredentials = new UserCredentials(
+            userCreds = new UserCredentials(
                 authUrl,
                 Constants.CREDENTIALS_USER_NAME,
                 Constants.CREDENTIALS_PASSWORD,
@@ -32,62 +32,62 @@ namespace com.mosso.cloudfiles.unit.tests.domain.UserCredentialsSpecs
         [Test]
         public void Should_have_username()
         {
-            Assert.That(userCredentials.Username, Is.EqualTo(Constants.CREDENTIALS_USER_NAME));
+            Assert.That(userCreds.Username, Is.EqualTo(Constants.CREDENTIALS_USER_NAME));
         }
 
         [Test]
         public void Should_have_password()
         {
-            Assert.That(userCredentials.Api_access_key, Is.EqualTo(Constants.CREDENTIALS_PASSWORD));
+            Assert.That(userCreds.Api_access_key, Is.EqualTo(Constants.CREDENTIALS_PASSWORD));
         }
 
         [Test]
         public void Should_have_auth_url()
         {
-            Assert.That(userCredentials.AuthUrl, Is.EqualTo(authUrl));
+            Assert.That(userCreds.AuthUrl, Is.EqualTo(authUrl));
         }
 
         [Test]
         public void Should_have_cloud_version()
         {
-            Assert.That(userCredentials.Cloudversion, Is.EqualTo(Constants.CREDENTIALS_CLOUD_VERSION));
+            Assert.That(userCreds.Cloudversion, Is.EqualTo(Constants.CREDENTIALS_CLOUD_VERSION));
         }
 
         [Test]
         public void Should_have_account_name()
         {
-            Assert.That(userCredentials.AccountName, Is.EqualTo(Constants.CREDENTIALS_ACCOUNT_NAME));
+            Assert.That(userCreds.AccountName, Is.EqualTo(Constants.CREDENTIALS_ACCOUNT_NAME));
         }
 
         [Test]
         public void Should_have_proxy_user_name_when_proxy_information_is_set()
         {
-            Assert.That(userCredentials.ProxyCredentials.ProxyUsername, Is.EqualTo(Constants.PROXY_USERNAME));
+            Assert.That(userCreds.ProxyCredentials.ProxyUsername, Is.EqualTo(Constants.PROXY_USERNAME));
         }
 
         [Test]
         public void Should_have_proxy_password_when_proxy_information_is_set()
         {
-            Assert.That(userCredentials.ProxyCredentials.ProxyPassword, Is.EqualTo(Constants.PROXY_PASSWORD));
+            Assert.That(userCreds.ProxyCredentials.ProxyPassword, Is.EqualTo(Constants.PROXY_PASSWORD));
         }
 
         [Test]
         public void Should_have_proxy_address_when_proxy_information_is_set()
         {
-            Assert.That(userCredentials.ProxyCredentials.ProxyAddress, Is.EqualTo(Constants.PROXY_ADDRESS));
+            Assert.That(userCreds.ProxyCredentials.ProxyAddress, Is.EqualTo(Constants.PROXY_ADDRESS));
         }
 
         [Test]
         public void Should_have_proxy_domain_when_proxy_information_is_set()
         {
-            Assert.That(userCredentials.ProxyCredentials.ProxyDomain, Is.EqualTo(Constants.PROXY_DOMAIN));
+            Assert.That(userCreds.ProxyCredentials.ProxyDomain, Is.EqualTo(Constants.PROXY_DOMAIN));
         }
     }
 
     [TestFixture]
     public class When_creating_user_credentials_without_auth_url
     {
-        private UserCredentials userCredentials;
+        private UserCredentials userCreds;
         private ProxyCredentials proxyCredentials;
 
         [SetUp]
@@ -95,7 +95,7 @@ namespace com.mosso.cloudfiles.unit.tests.domain.UserCredentialsSpecs
         {
             proxyCredentials = new ProxyCredentials(Constants.PROXY_ADDRESS, Constants.PROXY_USERNAME, Constants.PROXY_PASSWORD, Constants.PROXY_DOMAIN);
 
-            userCredentials = new UserCredentials(
+            userCreds = new UserCredentials(
                 Constants.CREDENTIALS_USER_NAME,
                 Constants.CREDENTIALS_PASSWORD,
                 proxyCredentials
@@ -105,7 +105,7 @@ namespace com.mosso.cloudfiles.unit.tests.domain.UserCredentialsSpecs
         [Test]
         public void Should_default_auth_url_to_mosso_api_url()
         {
-            Assert.That(userCredentials.AuthUrl.ToString(), Is.EqualTo(utils.Constants.MOSSO_AUTH_URL));
+            Assert.That(userCreds.AuthUrl.ToString(), Is.EqualTo(utils.Constants.MOSSO_AUTH_URL));
         }
     }
 }

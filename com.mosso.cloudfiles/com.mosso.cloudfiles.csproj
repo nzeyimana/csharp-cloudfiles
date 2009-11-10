@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -74,7 +74,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domain\Request\GetPublicContainerInformationSerialized.cs" />
     <Compile Include="Domain\Request\PutStorageDirectory.cs" />
+    <Compile Include="Domain\Request\SetAclOnPublicContainer.cs" />
     <Compile Include="Domain\Request\SetLoggingToContainerRequest.cs" />
     <Compile Include="Domain\Request\Interfaces\IAddToWebRequest.cs" />
     <Compile Include="Domain\Request\Interfaces\ICloudFilesRequest.cs" />
@@ -127,7 +129,6 @@
     <Compile Include="Exceptions\PublicContainerNotFoundException.cs" />
     <Compile Include="Exceptions\StorageItemNotFoundException.cs" />
     <Compile Include="Utils\ObjectNameValidator.cs" />
-    <Compile Include="AbstractConnection.cs" />
     <Compile Include="Connection.cs" />
     <Compile Include="Domain\StorageItem.cs" />
     <Compile Include="Domain\UserCredentials.cs" />
