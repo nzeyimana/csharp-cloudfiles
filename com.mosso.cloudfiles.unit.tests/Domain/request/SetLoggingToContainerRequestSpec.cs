@@ -38,7 +38,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request
         {
             SetupApply(false);
 
-            should("set method to put", () => requestmock.VerifySet(x => x.Method = "PUT"));
+            should("set method to put", () => requestmock.VerifySet(x => x.Method = "POST"));
             should("set X-Log-Retention to False", () => webheaders.KeyValueFor("X-Log-Retention").HasValueOf("False"));
         }
         public void when_logging_is_set()
@@ -46,7 +46,7 @@ namespace com.mosso.cloudfiles.unit.tests.Domain.request
 
             SetupApply(true);
 
-            should("set method to put", () => requestmock.VerifySet(x => x.Method = "PUT"));
+            should("set method to put", () => requestmock.VerifySet(x => x.Method = "POST"));
             should("set X-Log-Retention to True", () => webheaders.KeyValueFor("X-Log-Retention").HasValueOf("True"));
         }
     }
