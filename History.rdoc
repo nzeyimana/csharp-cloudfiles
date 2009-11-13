@@ -1,4 +1,9 @@
 = History
+== v1.4.2.0 (2009-11-13)
+== Bugfixes
+ * Removed some methods in the public api that were misleading and were not behaving well (namely setting ttl and logging on public containers)
+== New Features
+ * Added support for setting referrer acl and user agent acl on CDN enabled containers
 
 == v1.4.1.3 (2009-11-4)
 == Bugfixes

@@ -202,11 +202,10 @@ types are explicitly used in this example. The +var+ keyword could also be used 
 <b>Mark a container as private (remove it from the CDN)</b>
 	connection.MarkContainerAsPrivate("container name");
 
-<b>Enable access logs on public containers</b>
-	connection.SetLoggingOnPublicContainer("container name", true );
-
-<b>Disabled access logs on public containers</b>
-	connection.SetLoggingOnPublicContainer("container name", false);	
+<b>Update a CDN container's details</b>
+	int ttl = 7200
+	bool isloggingenabled = true
+	connection.SetDetailsOnPublicContainer("publiccontainer", isloggingenabled, ttl, "referreracl"", "useragentacl" );
 
 <b>Delete item from container</b>
 	connection.DeleteStorageItem("container name", "RemoteStorageItem.txt");
