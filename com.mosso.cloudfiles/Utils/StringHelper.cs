@@ -15,14 +15,13 @@ namespace com.mosso.cloudfiles.utils
 
         public static string Capitalize(this bool booleanValue)
         {
-            
             return booleanValue ? "True" : "False";
         }
 
         public static string Encode(this string stringToEncode)
         {
-            if (String.IsNullOrEmpty(stringToEncode))  
-                throw new ArgumentNullException();
+            if (String.IsNullOrEmpty(stringToEncode))
+                return String.Empty;
 
             return HttpUtility.UrlEncode(stringToEncode).Replace("+", "%20");
         }

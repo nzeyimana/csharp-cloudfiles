@@ -19,6 +19,7 @@ namespace com.mosso.cloudfiles
         List<string> GetContainerItemList(string containerName, Dictionary<GetItemListParameters, string> parameters);
         Container GetContainerInformation(string containerName);
         string GetContainerInformationJson(string containerName);
+        string GetContainerInformationJson(string containerName, Dictionary<GetItemListParameters, string> parameters);
         XmlDocument GetContainerInformationXml(string containerName);
         void PutStorageItemAsync(string containerName, Stream storageStream, string remoteStorageItemName);
         void PutStorageItemAsync(string containerName, string localStorageItemName);
@@ -38,7 +39,7 @@ namespace com.mosso.cloudfiles
         Uri MarkContainerAsPublic(string containerName);
         Uri MarkContainerAsPublic(string containerName, int timeToLiveInSeconds);
         void MarkContainerAsPrivate(string containerName);
-       
+
         Container GetPublicContainerInformation(string containerName);
         void MakePath(string containerName, string path);
         IAccount Account { get; }
@@ -46,15 +47,15 @@ namespace com.mosso.cloudfiles
         /// <summary>
         /// The storage url used to interact with cloud files
         /// </summary>
-        string StorageUrl { get;  set; }
+        string StorageUrl { get; set; }
 
         /// <summary>
         /// the session based token used to ensure the user was authenticated
         /// </summary>
-        string AuthToken { get;  set; }
+        string AuthToken { get; set; }
 
 
-        void SetDetailsOnPublicContainer(string publiccontainer, bool loggingenabled, int ttl, string referreracl, string useragentacl );
+        void SetDetailsOnPublicContainer(string publiccontainer, bool loggingenabled, int ttl, string referreracl, string useragentacl);
         XmlDocument GetPublicAccountInformationXML();
         string GetPublicAccountInformationJSON();
     }

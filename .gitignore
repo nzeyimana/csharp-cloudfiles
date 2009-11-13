@@ -17,3 +17,6 @@ Credentials.config
 coverage.xml
 coverage.xml.bkp
 com.mosso.cloudfiles.sln.proj
+
+/com.mosso.cloudfiles/com.mosso.cloudfiles_2010.csproj
+/com.mosso.cloudfiles/com.mosso.cloudfiles__2010.csproj

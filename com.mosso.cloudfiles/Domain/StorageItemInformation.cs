@@ -2,23 +2,40 @@
 /// See COPYING file for licensing information
 ///
 
+using System;
 using System.Collections.Generic;
 using System.Net;
+using com.mosso.cloudfiles.domain.response.Interfaces;
 using com.mosso.cloudfiles.utils;
 
 namespace com.mosso.cloudfiles.domain
 {
     public class StorageItemInformation
     {
+        private readonly string objectName;
+        private readonly DateTime lastModified;
+        private readonly long sizeInBytes;
         private readonly WebHeaderCollection headers;
 
         /// <summary>
         /// constructor
         /// </summary>
-        /// <param name="headers">collection of headers assigned to this storage item</param>
-        public StorageItemInformation(WebHeaderCollection headers)
+        /// <param name="objectName">Storage Item Name</param>
+        /// <param name="response">CloudFiles response</param>
+        public StorageItemInformation(string objectName, ICloudFilesResponse response)
         {
-            this.headers = headers;
+            this.headers = response.Headers;
+            this.objectName = objectName;
+            this.lastModified = response.LastModified;
+            this.sizeInBytes = response.ContentLength;
+        }
+
+        /// <summary>
+        /// The name in the container
+        /// </summary>
+        public string Name
+        {
+            get { return objectName; }
         }
 
         /// <summary>
@@ -43,6 +60,22 @@ namespace com.mosso.cloudfiles.domain
         public string ContentLength
         {
             get { return headers[Constants.CONTENT_LENGTH_HEADER]; }
+        }
+
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
+        public long SizeInBytes
+        {
+            get { return sizeInBytes; }
+        }
+
+        /// <summary>
+        /// Last modified
+        /// </summary>
+        public DateTime LastModified
+        {
+            get { return lastModified; }
         }
 
         /// <summary>
